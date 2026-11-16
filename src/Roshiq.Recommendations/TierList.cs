@@ -6,10 +6,12 @@ namespace Roshiq.Recommendations;
 /// <summary>Группа рангов для тир-листа.</summary>
 public enum RankBracket { All, Low, Mid, High, Immortal, Pro }
 
-public sealed record TierEntry(Hero Hero, string Tier, double WinRate, double PickRate, int Games);
+/// <param name="Popular">0.24.1: «в мете» — героя берут заметно чаще остальных на этой позиции (верхняя четверть по частоте) и он не проигрывает.</param>
+public sealed record TierEntry(Hero Hero, string Tier, double WinRate, double PickRate, int Games, bool Popular = false);
 
 /// <summary>
-/// 0.23.0: тир-лист по позиции — доля побед героя в выбранных рангах по данным OpenDota (/heroStats, последние ~30 дней пабликов).
+/// 0.23.0: тир-лист по позиции — доля побед героя в выбранных рангах по данным OpenDota (/heroStats: «недавние матчи»,
+/// точный период OpenDota не называет).
 /// OpenDota не делит статистику по позициям: герой попадает в позицию по нашей базе героев, а процент — общий по всем его матчам.
 /// Редкие герои сглажены к 50% (+100 игр по 50%), чтобы 8 побед из 10 не выглядели «S-тиром».
 /// </summary>
@@ -70,6 +72,23 @@ public static class TierList
             double wr = (wins + Prior * 0.5) / (games + Prior);
             list.Add(new TierEntry(h, TierFor(wr), wr, pick, games));
         }
-        return list.OrderByDescending(e => e.WinRate).ToList();
+        return MarkPopular(list).OrderByDescending(e => e.WinRate).ToList();
+    }
+
+    /// <summary>Минимальная доля побед, чтобы популярного героя назвать «в мете»: часто берут, но стабильно проигрывают — это не мета.</summary>
+    public const double PopularMinWinRate = 0.495;
+
+    /// <summary>
+    /// 0.24.1: отметить героев «в мете» — частота выбора в верхней четверти списка позиции (и не меньше чем в полтора раза выше медианы)
+    /// при доле побед от <see cref="PopularMinWinRate"/>. Тир по-прежнему считается только по доле побед.
+    /// </summary>
+    public static List<TierEntry> MarkPopular(List<TierEntry> list)
+    {
+        if (list.Count < 4) return list;
+        var picks = list.Select(e => e.PickRate).OrderBy(p => p).ToList();
+        double median = picks[picks.Count / 2];
+        double q75 = picks[(int)Math.Floor((picks.Count - 1) * 0.75)];
+        double threshold = Math.Max(q75, median * 1.5);
+        return list.Select(e => e with { Popular = e.PickRate >= threshold && e.WinRate >= PopularMinWinRate }).ToList();
     }
 }

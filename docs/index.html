@@ -356,7 +356,7 @@ html{scroll-padding-top:calc(var(--nav-height,76px) + 24px)}
 @media(max-width:640px){.hero .stickers .s2,.hero .stickers .s4{display:none}.hero .stripe{height:350px}.hero .main{gap:48px}.project-extra{padding:0 18px}}
 @media(max-width:640px){.screen-panel{border-radius:8px}.screen-panel figcaption{padding:16px;font-size:14px}.screen-tabs button{padding:12px 14px;font-size:14px}}
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ROSHIQ", "description": "Бесплатный помощник для Dota 2 с открытым кодом: подсказки во время игры, автодрафт, сборки и разбор матча.", "applicationCategory": "GameApplication", "operatingSystem": "Windows 10, Windows 11", "softwareVersion": "0.23.0", "url": "https://baramobatare-rgb.github.io/ROSHIQ/", "downloadUrl": "https://github.com/baramobatare-rgb/ROSHIQ/releases/latest", "image": "https://baramobatare-rgb.github.io/ROSHIQ/site/og.png", "inLanguage": ["ru", "en"], "isAccessibleForFree": true, "license": "https://github.com/baramobatare-rgb/ROSHIQ", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "RUB"}, "sameAs": ["https://github.com/baramobatare-rgb/ROSHIQ", "https://vk.ru/roshiq", "https://www.youtube.com/channel/UC3xilUrjDyh56-WjvLwdOFQ", "https://www.tiktok.com/@baramobatare", "https://discord.gg/BhZTcTFwuM"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ROSHIQ", "description": "Бесплатный помощник для Dota 2 с открытым кодом: подсказки во время игры, автодрафт, сборки и разбор матча.", "applicationCategory": "GameApplication", "operatingSystem": "Windows 10, Windows 11", "softwareVersion": "0.24.1", "url": "https://baramobatare-rgb.github.io/ROSHIQ/", "downloadUrl": "https://github.com/baramobatare-rgb/ROSHIQ/releases/latest", "image": "https://baramobatare-rgb.github.io/ROSHIQ/site/og.png", "inLanguage": ["ru", "en"], "isAccessibleForFree": true, "license": "https://github.com/baramobatare-rgb/ROSHIQ", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "RUB"}, "sameAs": ["https://github.com/baramobatare-rgb/ROSHIQ", "https://vk.ru/roshiq", "https://www.youtube.com/channel/UC3xilUrjDyh56-WjvLwdOFQ", "https://www.tiktok.com/@baramobatare", "https://discord.gg/BhZTcTFwuM"]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Нужен ли интернет?", "acceptedAnswer": {"@type": "Answer", "text": "Нет. Без интернета работают драфт, сборки, таймеры, подсказки и итог матча. Интернет нужен для статистики OpenDota и обновлений, его можно выключить одной галочкой."}}, {"@type": "Question", "name": "Могут ли забанить?", "acceptedAnswer": {"@type": "Answer", "text": "Гарантий не даст никто: Valve программу не проверяла. ROSHIQ получает данные через Game State Integration — интерфейс самой Dota 2 — и смотрит на экран драфта. Он не читает память игры, не внедряет код и не нажимает клавиши."}}, {"@type": "Question", "name": "Сколько стоит?", "acceptedAnswer": {"@type": "Answer", "text": "Нисколько. Ни подписок, ни рекламы, ни платных функций. Код открыт — любой может посмотреть, что внутри."}}, {"@type": "Question", "name": "Нашёл ошибку или есть идея", "acceptedAnswer": {"@type": "Answer", "text": "Напиши в комментариях под роликами, в сообществе ВКонтакте или открой issue на GitHub."}}]}</script>
 </head>
 <body>
@@ -394,6 +394,7 @@ html{scroll-padding-top:calc(var(--nav-height,76px) + 24px)}
       <div class="portable-choice"><a href="https://github.com/baramobatare-rgb/ROSHIQ/releases/latest" data-portable data-goal="portable" data-i18n="portable">Портативная версия (.zip) — без установки</a></div>
       <a class="start-link" href="#start" data-i18n="startLink">Как запустить в первый раз ↗</a>
       <a class="start-link" style="display:table;margin-top:10px" href="app/" data-goal="webapp" data-i18n="webappLink">Разобрать любой матч онлайн — без установки ↗</a>
+      <a class="start-link" style="display:table;margin-top:6px" href="https://t.me/RoshiqAppBot/app" target="_blank" rel="noopener" data-goal="tgbot" data-i18n="tgbotLink">Или в Telegram — @RoshiqAppBot ↗</a>
       <div class="proof"><span data-i18n="free">Бесплатно, без подписки</span><span data-i18n="local">История хранится на ПК</span></div>
       <div class="mobile-share"><button type="button" class="copy-link" id="copyLink" data-i18n="copy">Скопировать ссылку для ПК</button><span class="copy-status" id="copyStatus" role="status"></span></div>
     </div>
@@ -546,9 +547,9 @@ html{scroll-padding-top:calc(var(--nav-height,76px) + 24px)}
   <div class="w">
     <h2 data-i18n="h2d">Что нового</h2>
     <ul class="news">
-      <li><span class="v">0.23.0</span><div><b data-i18n="v1">Тир-лист по позициям</b><span data-i18n="v1d">Какие герои сейчас сильны на каждой позиции в твоих рангах и кем их контрить. Плюс подсказки после драк: что делать прямо сейчас.</span></div></li>
-      <li><span class="v">0.22.1</span><div><b data-i18n="v2">Разбор любого матча по ID</b><span data-i18n="v2d">Вставь ссылку или номер матча — в программе или прямо в браузере, без установки.</span></div></li>
-      <li><span class="v">0.22.0</span><div><b data-i18n="v3">Ход матча</b><span data-i18n="v3d">График преимущества по золоту и опыту и ключевые моменты: где команда проиграла драку и какие смерти были без размена.</span></div></li>
+      <li><span class="v">0.24.0</span><div><b data-i18n="v1">Новый оверлей</b><span data-i18n="v1d">Виджет: главное, золото до предмета и ближайшие события. Важные советы — крупной карточкой, а в драке обычные советы ждут. Калибровка под твой экран.</span></div></li>
+      <li><span class="v">0.23.0</span><div><b data-i18n="v2">Тир-лист по позициям</b><span data-i18n="v2d">Какие герои сейчас сильны на каждой позиции в твоих рангах, кто в мете и кем их контрить.</span></div></li>
+      <li><span class="v">0.22.1</span><div><b data-i18n="v3">Разбор любого матча</b><span data-i18n="v3d">По ID или ссылке — в программе, в браузере или в Telegram через @RoshiqAppBot.</span></div></li>
     </ul>
     <a class="all" href="https://github.com/baramobatare-rgb/ROSHIQ/blob/main/CHANGELOG.md" data-goal="github" data-i18n="all">Вся история изменений</a>
   </div>
@@ -636,9 +637,9 @@ nh:"Doesn’t",x1:"no memory reading, no code injection",x2:"no key presses, no 
 bf:"ROSHIQ is an independent open-source project. Valve hasn’t reviewed or approved it. You can inspect how the app works in the source code.",
 h2c:"Three minutes and you’re in",s1:"Download",s1p:"the installer and run it. No separate .NET install needed.",s2:"Set up",s2p:"language, role and game connection — the connection is one button.",
 s3:"Play",s3p:"restart Dota 2. <kbd>F8</kbd> toggles the panel.",
-h2d:"What’s new",v1:"Tier list by position",v1d:"Which heroes are strong right now in each position at your ranks, and who counters them. Plus post-fight tips on what to do right now.",
-v2:"Review any match by ID",v2d:"Paste a match link or number — in the app or right in your browser, nothing to install.",
-v3:"Match timeline",v3d:"A gold and XP advantage chart plus the key moments: lost fights and deaths with no trade.",all:"Full changelog",
+h2d:"What’s new",v1:"New overlay",v1d:"A widget with the main pick, gold to your next item and upcoming events. Important advice as a large card, and regular advice waits during fights. Calibrated to your screen.",
+v2:"Tier list by position",v2d:"Which heroes are strong right now in each position at your ranks, which are meta, and who counters them.",
+v3:"Review any match",v3d:"By ID or link: in the app, in your browser, or in Telegram via @RoshiqAppBot.",all:"Full changelog",
 h2e:"Questions",q1:"Do I need internet?",a1:"No. Draft, builds, timers, tips and the match summary work offline. Internet is for OpenDota stats and updates — one checkbox turns it off.",
 q2:"I can’t see the panel over the game",a2:"Switch Dota 2 to “Borderless window” (Settings → Video). Transparent windows can’t be drawn over exclusive fullscreen.",
 q3:"Windows says it protected my PC",a3:"Click “More info” → “Run anyway”. The app doesn’t have a paid code signature yet. You can check the file with SHA256SUMS.txt on the release page.",
@@ -660,7 +661,7 @@ EN.screenReviewCaption="A missed teleport reminder becomes a goal for the next m
 EN.screenZoom="Open full size ↗";
 EN.screensNote="Screenshots of ROSHIQ 0.19.4. The match ID is hidden. Click an image to see the details.";
 EN.portable="Portable version (.zip) — no installation";
-EN.webappLink="Review any match online — no install ↗";
+EN.webappLink="Review any match online — no install ↗";EN.tgbotLink="Or in Telegram — @RoshiqAppBot ↗";
 EN.h2w="What makes ROSHIQ different";EN.whyIntro="There are other Dota helpers. Here's what we do differently.";
 EN.w1="Free forever";EN.w1p="No subscription, trial or paid features. No account or sign-in — download and play.";
 EN.w2="Open source";EN.w2p="Anyone can check what the app does and where it connects. Every request is listed in the app's network log.";

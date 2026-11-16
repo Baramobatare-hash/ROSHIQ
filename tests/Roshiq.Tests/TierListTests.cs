@@ -73,4 +73,26 @@ public class TierListTests
     [InlineData(0.49, "C")]
     [InlineData(0.46, "D")]
     public void Tier_Thresholds(double wr, string tier) => Assert.Equal(tier, TierList.TierFor(wr));
+
+    [Fact]
+    public void MarkPopular_FlagsOftenPickedHeroes_ThatDoNotLose()
+    {
+        var h = TestData.Db.Heroes.Take(8).ToList();
+        var list = new List<TierEntry>
+        {
+            new(h[0], "B", 0.505, 0.090, 9000),   // берут втрое чаще остальных и не проигрывает — в мете
+            new(h[1], "D", 0.470, 0.095, 9500),   // берут часто, но проигрывает — не мета
+            new(h[2], "S", 0.540, 0.020, 2000),
+            new(h[3], "A", 0.520, 0.025, 2500),
+            new(h[4], "B", 0.500, 0.030, 3000),
+            new(h[5], "C", 0.490, 0.022, 2200),
+            new(h[6], "B", 0.501, 0.028, 2800),
+            new(h[7], "C", 0.488, 0.024, 2400),
+        };
+        var marked = TierList.MarkPopular(list);
+        Assert.True(marked[0].Popular);
+        Assert.False(marked[1].Popular);
+        Assert.Equal(1, marked.Count(e => e.Popular));
+        Assert.Equal(list.Select(e => e.Tier), marked.Select(e => e.Tier));   // тир не меняется
+    }
 }

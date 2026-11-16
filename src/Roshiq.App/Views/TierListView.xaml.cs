@@ -88,7 +88,7 @@ public partial class TierListView : UserControl, IRefreshable
         if (stats == null)
         {
             CounterCard.Visibility = Visibility.Collapsed;
-            if (!_loading) StatusText.Text = App.Host.Settings.Current.Data.AllowOnlineStats ? L.Get("tier_none") : L.Get("steam_need_network");
+            if (!_loading) StatusText.Text = App.Host.Settings.Current.Data.AllowOnlineStats ? L.Get("tier_none") : L.Get("tier_need_network");
             return;
         }
         var entries = TierList.Build(stats, App.Host.Database.Heroes, _position, _bracket);
@@ -133,7 +133,16 @@ public partial class TierListView : UserControl, IRefreshable
         var stack = new StackPanel { Orientation = Orientation.Horizontal };
         stack.Children.Add(Ui.Portrait(e.Hero, 64));
         var text = new StackPanel { Margin = new Thickness(8, 0, 2, 0), VerticalAlignment = VerticalAlignment.Center };
-        text.Children.Add(new TextBlock { Text = e.Hero.Name, Foreground = Ui.Res("Text"), FontWeight = FontWeights.SemiBold, FontSize = 13 });
+        var name = new StackPanel { Orientation = Orientation.Horizontal };
+        name.Children.Add(new TextBlock { Text = e.Hero.Name, Foreground = Ui.Res("Text"), FontWeight = FontWeights.SemiBold, FontSize = 13, VerticalAlignment = VerticalAlignment.Center });
+        if (e.Popular)
+            name.Children.Add(new Border
+            {
+                Background = Ui.Res("AccentSoft"), BorderBrush = Ui.Res("Accent"), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(6),
+                Padding = new Thickness(6, 0, 6, 1), Margin = new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center,
+                Child = new TextBlock { Text = L.Get("tier_meta"), Foreground = Ui.Res("Accent"), FontSize = 10.5, FontWeight = FontWeights.SemiBold }
+            });
+        text.Children.Add(name);
         text.Children.Add(new TextBlock
         {
             Text = L.Format("tier_tile", Pct(e.WinRate), Pct(e.PickRate)), Foreground = Ui.Res("Muted"), FontSize = 11.5
