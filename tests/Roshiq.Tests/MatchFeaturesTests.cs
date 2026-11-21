@@ -88,8 +88,8 @@ public class RoshanTests
         var st = r.State(1300);
         Assert.Equal(RoshanPhase.Dead, st.Phase);
         Assert.Equal(200, st.AegisLeftSec);
-        Assert.Equal(1680, st.RespawnMinAt);
-        Assert.Equal(1860, st.RespawnMaxAt);
+        Assert.Equal(1620, st.RespawnMinAt);
+        Assert.Equal(1800, st.RespawnMaxAt);
         Assert.Equal(0, r.State(1500).AegisLeftSec);
         Assert.Equal(RoshanPhase.MaybeAlive, r.State(1700).Phase);
     }
@@ -101,8 +101,8 @@ public class RoshanTests
         r.MarkKilled(0);
         Assert.Equal(new[] { "rosh_aegis_soon" }, r.Due(275));
         Assert.Empty(r.Due(280));
-        Assert.Equal(new[] { "rosh_respawn_min" }, r.Due(480));
-        Assert.Equal(new[] { "rosh_respawn_max" }, r.Due(661));
+        Assert.Equal(new[] { "rosh_respawn_min" }, r.Due(420));
+        Assert.Equal(new[] { "rosh_respawn_max" }, r.Due(601));
     }
 
     [Fact]

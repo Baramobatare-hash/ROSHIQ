@@ -117,8 +117,8 @@ internal static class StringsExtra
 
         // ---------- Рошан
         ["rosh_title"] = ("Рошан", "Roshan"),
-        ["rosh_hint"] = ("Нажмите {0} (или кнопку ниже), когда Рошан убит: оверлей покажет окно возрождения 8–11 минут и время Аегиса. Повторное нажатие в течение 10 секунд снимает отметку.",
-            "Press {0} (or the button below) when Roshan dies: the overlay shows the 8–11 minute respawn window and Aegis time. Press again within 10 seconds to undo."),
+        ["rosh_hint"] = ("Нажмите {0} (или кнопку ниже), когда Рошан убит: оверлей покажет окно возрождения (7–10 минут после первого убийства, каждое следующее — на минуту раньше, но не меньше 5–8) и время Аегиса. Повторное нажатие в течение 10 секунд снимает отметку.",
+            "Press {0} (or the button below) when Roshan dies: the overlay shows the respawn window (7–10 minutes after the first kill, a minute shorter after each next one, down to 5–8) and Aegis time. Press again within 10 seconds to undo."),
         ["rosh_mark"] = ("Рошан убит", "Roshan killed"),
         ["rosh_clear"] = ("Сбросить", "Reset"),
         ["rosh_header"] = ("Рошан", "Roshan"),
@@ -137,13 +137,13 @@ internal static class StringsExtra
         ["ov_hotkey_roshan"] = ("Рошан убит", "Roshan killed"),
         ["ov_hotkey_glyph"] = ("Глиф врага", "Enemy glyph"),
         ["glyph_header"] = ("Глиф врага", "Enemy glyph"),
-        ["glyph_short"] = ("Глиф врага", "Enemy glyph"),
+        ["glyph_short"] = ("Заряд глифа", "Glyph charge"),
         ["glyph_ready_short"] = ("готов", "ready"),
-        ["glyph_marked"] = ("Отмечено: глиф врагов снова будет в {0}. Раньше — если они потеряют первую вышку T1/T2 или первый барак.",
-            "Marked: the enemy glyph is back at {0}. Sooner if they lose their first T1/T2 tower or first barracks."),
-        ["glyph_ready"] = ("Глиф врагов снова готов — пушьте с запасом по времени.", "The enemy glyph is ready again — push with time to spare."),
-        ["glyph_hint"] = ("Увидели, что враги нажали глиф, — нажмите {0}: оверлей покажет, когда он снова будет готов (5 минут).",
-            "Saw the enemy use glyph? Press {0}: the overlay shows when it is ready again (5 minutes)."),
+        ["glyph_marked"] = ("Отмечено: следующий заряд глифа врага восстановится примерно в {0}.",
+            "Marked: the next enemy glyph charge should replenish at {0}."),
+        ["glyph_ready"] = ("У врага должен восстановиться заряд глифа.", "An enemy glyph charge should have replenished."),
+        ["glyph_hint"] = ("Нажмите {0} при каждом применении вражеского глифа. У глифа два заряда, каждый восстанавливается 6 минут. Повторное нажатие раньше чем через 7 секунд отменяет отметку.",
+            "Press {0} each time the enemy uses glyph. It has two charges, with six minutes to replenish each. Press again within seven seconds to undo."),
 
         // ---------- ситуативные подсказки
         ["alerts_title"] = ("Ситуативные подсказки", "Situational hints"),

@@ -27,7 +27,7 @@ if errorlevel 1 (
   echo TAG PUSH FAILED >> "%LOG%"
 ) else (
   echo Готово. Через 5–10 минут установщик появится здесь:
-  echo https://github.com/baramobatare-rgb/ROSHIQ/releases
+  echo https://github.com/Baramobatare-hash/ROSHIQ/releases
   echo TAG PUSH OK >> "%LOG%"
 )
 pause

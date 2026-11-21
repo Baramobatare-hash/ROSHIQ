@@ -200,7 +200,7 @@ public static class DiagnosticsRunner
             list.Add(od == null
                 ? new(CheckStatus.Ok, "OpenDota", L.Get("diag_net_ok"))
                 : new(CheckStatus.Warning, "OpenDota", L.Format("diag_net_fail", od)));
-            var gh = await PingAsync(Roshiq.Data.RemoteData.BaseUrl(string.IsNullOrWhiteSpace(s.Data.UpdateRepo) ? "baramobatare-rgb/ROSHIQ" : s.Data.UpdateRepo) + "data_version.txt", ct);
+            var gh = await PingAsync(Roshiq.Data.RemoteData.BaseUrl(string.IsNullOrWhiteSpace(s.Data.UpdateRepo) ? "Baramobatare-hash/ROSHIQ" : s.Data.UpdateRepo) + "data_version.txt", ct);
             list.Add(gh == null
                 ? new(CheckStatus.Ok, "GitHub", L.Get("diag_net_ok"))
                 : new(CheckStatus.Warning, "GitHub", L.Format("diag_net_fail", gh)));

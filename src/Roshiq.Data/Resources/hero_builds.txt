@@ -258,7 +258,7 @@ warlock|4|mid|item_arcane_boots,item_glimmer_cape,item_solar_crest
 warlock|4|late|item_ultimate_scepter,item_blink,item_force_staff
 beastmaster|3|start|item_branches,item_tango,item_sobi_mask,item_magic_stick
 beastmaster|3|early|item_arcane_boots,item_null_talisman
-beastmaster|3|mid|item_helm_of_the_overlord,item_blink,item_ultimate_scepter
+beastmaster|3|mid|item_blink,item_ultimate_scepter
 beastmaster|3|late|item_black_king_bar,item_assault,item_travel_boots
 queenofpain|2|start|item_branches,item_tango,item_faerie_fire
 queenofpain|2|early|item_power_treads,item_null_talisman,item_soul_ring
@@ -545,10 +545,10 @@ obsidian_destroyer|2|early|item_null_talisman,item_power_treads
 obsidian_destroyer|2|mid|item_blink,item_yasha_and_kaya,item_meteor_hammer
 obsidian_destroyer|2|late|item_sheepstick,item_hurricane_pike,item_black_king_bar
 lycan|1|start|item_branches,item_sobi_mask,item_tango,item_quelling_blade
-lycan|1|mid|item_aghanims_shard,item_helm_of_the_overlord,item_assault
+lycan|1|mid|item_aghanims_shard,item_assault
 lycan|1|late|item_black_king_bar,item_ultimate_scepter,item_nullifier
 lycan|3|start|item_branches,item_sobi_mask,item_tango,item_quelling_blade
-lycan|3|mid|item_aghanims_shard,item_helm_of_the_overlord,item_assault
+lycan|3|mid|item_aghanims_shard,item_assault
 lycan|3|late|item_black_king_bar,item_ultimate_scepter,item_blink
 brewmaster|3|start|item_branches,item_circlet,item_tango,item_gauntlets
 brewmaster|3|early|item_bracer,item_phase_boots

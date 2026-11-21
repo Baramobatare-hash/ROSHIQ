@@ -7,18 +7,38 @@ namespace Roshiq.Tests;
 public class GlyphTimerTests
 {
     [Fact]
-    public void Glyph_ReadyAfterFiveMinutes_AnnouncedOnce()
+    public void Glyph_ReadyAfterSixMinutes_AnnouncedOnce()
     {
         var g = new GlyphTracker();
         Assert.Null(g.ReadyIn(600));
         g.MarkUsed(600);
-        Assert.Equal(300, g.ReadyIn(600));
-        Assert.Equal(60, g.ReadyIn(840));
-        Assert.False(g.DueReady(840));
-        Assert.True(g.DueReady(900));
-        Assert.False(g.DueReady(905));   // второй раз не напоминаем
-        Assert.Equal(0, g.ReadyIn(905));
-        Assert.Null(g.ReadyIn(961));     // давно готов — отметка уходит из строки таймеров
+        Assert.Equal(360, g.ReadyIn(600));
+        Assert.Equal(60, g.ReadyIn(900));
+        Assert.False(g.DueReady(900));
+        Assert.True(g.DueReady(960));
+        Assert.False(g.DueReady(965));   // второй раз не напоминаем
+        Assert.Equal(0, g.ReadyIn(965));
+        Assert.Null(g.ReadyIn(1021));     // давно готов — отметка уходит из строки таймеров
+    }
+
+    [Fact]
+    public void Glyph_TwoUsesKeepTheFirstRechargeAndQueueTheSecond()
+    {
+        var g = new GlyphTracker();
+        g.MarkUsed(600);
+        g.MarkUsed(607);
+        Assert.Equal(353, g.ReadyIn(607));
+        Assert.True(g.DueReady(960));
+        Assert.Equal(329, g.ReadyIn(991));
+        Assert.True(g.DueReady(1320));
+
+        g.Clear();
+        g.MarkUsed(600);
+        g.MarkUsed(607);
+        g.Undo();
+        Assert.Equal(600, g.UsedAt);
+        Assert.True(g.DueReady(960));
+        Assert.Null(g.ReadyIn(1021));
     }
 
     [Fact]

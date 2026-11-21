@@ -12,8 +12,8 @@ Free code signing provided by [SignPath.io](https://about.signpath.io), certific
 
 ## Team roles
 
-- Committers and reviewers: [Members team](https://github.com/baramobatare-rgb/ROSHIQ/graphs/contributors)
-- Approvers: [baramobatare-rgb](https://github.com/baramobatare-rgb)
+- Committers and reviewers: [Members team](https://github.com/Baramobatare-hash/ROSHIQ/graphs/contributors)
+- Approvers: [Baramobatare-hash](https://github.com/Baramobatare-hash)
 
 ## Privacy policy
 

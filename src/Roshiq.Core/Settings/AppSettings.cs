@@ -97,6 +97,10 @@ public sealed class AppSettings
         Vision ??= new();
         Data ??= new();
         if (string.IsNullOrWhiteSpace(Data.UpdateRepo)) Data.UpdateRepo = DataSettings.DefaultUpdateRepo;
+        // Проект переехал на новый аккаунт GitHub: старый адрес по умолчанию меняем на новый, свой адрес пользователя не трогаем.
+        else if (string.Equals(Data.UpdateRepo.Trim().TrimEnd('/'), DataSettings.LegacyUpdateRepo, StringComparison.OrdinalIgnoreCase)
+                 || string.Equals(Data.UpdateRepo.Trim().TrimEnd('/'), "https://github.com/" + DataSettings.LegacyUpdateRepo, StringComparison.OrdinalIgnoreCase))
+            Data.UpdateRepo = DataSettings.DefaultUpdateRepo;
         Overlay.Normalize();
         Notifications.Normalize();
         Gsi.Normalize();
@@ -121,7 +125,7 @@ public sealed class OverlaySettings
     public bool AutoScale { get; set; } = true;
     /// <summary>Отметить убийство Рошана (запускает таймер возрождения и Аегиса).</summary>
     public string RoshanHotkey { get; set; } = "Ctrl+Shift+K";
-    /// <summary>0.21.5: отметить, что враги нажали глиф (таймер перезарядки 5 минут).</summary>
+    /// <summary>0.21.5: отметить, что враги нажали глиф (таймер восстановления заряда).</summary>
     public string GlyphHotkey { get; set; } = "Ctrl+Shift+G";
     public string TargetProcess { get; set; } = "dota2";
     public bool HideWhenGameNotFocused { get; set; } = false;
@@ -262,7 +266,9 @@ public sealed class DataSettings
     /// <summary>Репозиторий GitHub с релизами ROSHIQ в виде owner/repo.</summary>
     public string? UpdateRepo { get; set; } = DefaultUpdateRepo;
     /// <summary>Официальный репозиторий ROSHIQ с релизами.</summary>
-    public const string DefaultUpdateRepo = "baramobatare-rgb/ROSHIQ";
+    public const string DefaultUpdateRepo = "Baramobatare-hash/ROSHIQ";
+    /// <summary>Прежний адрес репозитория (аккаунт GitHub скрыт); сохранённые настройки с ним переводятся на новый.</summary>
+    public const string LegacyUpdateRepo = "baramobatare-rgb/ROSHIQ";
     /// <summary>Раз в день проверять новый патч, цены предметов и версию ROSHIQ (только если сеть разрешена).</summary>
     public bool AutoCheckOnline { get; set; } = true;
     /// <summary>Подтягивать обновления файлов данных (герои, таймеры, правила) с GitHub без новой версии программы.</summary>

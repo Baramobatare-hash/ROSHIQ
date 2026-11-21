@@ -3,7 +3,8 @@ chcp 65001 >nul
 rem Обновить репозиторий ROSHIQ на GitHub текущим состоянием этой папки.
 rem Лишнее (bin, obj, dist, иконки предметов, build.log) не загружается — см. .gitignore.
 cd /d "%~dp0"
-set REPO=https://github.com/baramobatare-rgb/ROSHIQ.git
+rem Имя в адресе — чтобы Git спросил вход именно в этот аккаунт, а не в старый.
+set REPO=https://Baramobatare-hash@github.com/Baramobatare-hash/ROSHIQ.git
 set LOG=%~dp0github-update.log
 echo === %date% %time% === > "%LOG%"
 
@@ -16,8 +17,8 @@ if not exist ".git" (
 git remote get-url origin >nul 2>&1 && git remote set-url origin %REPO% || git remote add origin %REPO%
 
 rem Имя и почта для коммитов только в этом репозитории (если не заданы глобально)
-git config user.name >nul 2>&1 || git config user.name "baramobatare-rgb"
-git config user.email >nul 2>&1 || git config user.email "baramobatare-rgb@users.noreply.github.com"
+git config user.name >nul 2>&1 || git config user.name "Baramobatare-hash"
+git config user.email >nul 2>&1 || git config user.email "Baramobatare-hash@users.noreply.github.com"
 
 rem Сначала сохраняем свои изменения, потом сливаем с GitHub: файлы, которые здесь не менялись (например, сборки,
 rem которые раз в неделю обновляет GitHub), берутся с GitHub, а не затираются старой копией из этой папки.
@@ -46,7 +47,7 @@ if errorlevel 1 (
   echo ОШИБКА: не удалось загрузить. Подробности в github-update.log
   echo PUSH FAILED >> "%LOG%"
 ) else (
-  echo Готово: https://github.com/baramobatare-rgb/ROSHIQ
+  echo Готово: https://github.com/Baramobatare-hash/ROSHIQ
   echo PUSH OK >> "%LOG%"
 )
 pause

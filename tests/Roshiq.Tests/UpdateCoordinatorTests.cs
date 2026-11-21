@@ -10,9 +10,9 @@ public class UpdateCoordinatorTests
 {
     public UpdateCoordinatorTests() { InstallerChecksum.Delay = (_, _) => Task.CompletedTask; }   // повторы без реальных пауз
 
-    private const string Repo = "baramobatare-rgb/ROSHIQ";
-    private const string ApiUrl = "https://api.github.com/repos/baramobatare-rgb/ROSHIQ/releases/latest";
-    private const string PageUrl = "https://github.com/baramobatare-rgb/ROSHIQ/releases/latest";
+    private const string Repo = "Baramobatare-hash/ROSHIQ";
+    private const string ApiUrl = "https://api.github.com/repos/Baramobatare-hash/ROSHIQ/releases/latest";
+    private const string PageUrl = "https://github.com/Baramobatare-hash/ROSHIQ/releases/latest";
     private static readonly Version Current = new(0, 17, 3);
 
     /// <summary>Поддельный сервер: ответы по адресу, счётчик запросов, необязательная задержка.</summary>

@@ -3,9 +3,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/baramobatare-rgb/ROSHIQ/releases/latest"><img src="https://img.shields.io/github/v/release/baramobatare-rgb/ROSHIQ?label=%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F&style=for-the-badge&labelColor=0A0D07&color=B5FF4D" alt="Версия" /></a>
-  <a href="https://github.com/baramobatare-rgb/ROSHIQ/releases"><img src="https://img.shields.io/github/downloads/baramobatare-rgb/ROSHIQ/total?label=%D1%81%D0%BA%D0%B0%D1%87%D0%B8%D0%B2%D0%B0%D0%BD%D0%B8%D0%B9&style=for-the-badge&labelColor=0A0D07&color=B5FF4D" alt="Скачиваний" /></a>
-  <a href="https://github.com/baramobatare-rgb/ROSHIQ/actions"><img src="https://img.shields.io/github/actions/workflow/status/baramobatare-rgb/ROSHIQ/ci.yml?branch=main&label=%D1%82%D0%B5%D1%81%D1%82%D1%8B&style=for-the-badge&labelColor=0A0D07&color=B5FF4D" alt="Тесты" /></a>
+  <a href="https://github.com/Baramobatare-hash/ROSHIQ/releases/latest"><img src="https://img.shields.io/github/v/release/Baramobatare-hash/ROSHIQ?label=%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F&style=for-the-badge&labelColor=0A0D07&color=B5FF4D" alt="Версия" /></a>
+  <a href="https://github.com/Baramobatare-hash/ROSHIQ/releases"><img src="https://img.shields.io/github/downloads/Baramobatare-hash/ROSHIQ/total?label=%D1%81%D0%BA%D0%B0%D1%87%D0%B8%D0%B2%D0%B0%D0%BD%D0%B8%D0%B9&style=for-the-badge&labelColor=0A0D07&color=B5FF4D" alt="Скачиваний" /></a>
+  <a href="https://github.com/Baramobatare-hash/ROSHIQ/actions"><img src="https://img.shields.io/github/actions/workflow/status/Baramobatare-hash/ROSHIQ/ci.yml?branch=main&label=%D1%82%D0%B5%D1%81%D1%82%D1%8B&style=for-the-badge&labelColor=0A0D07&color=B5FF4D" alt="Тесты" /></a>
   <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-B5FF4D?style=for-the-badge&labelColor=0A0D07" alt="Windows 10 и 11" />
 </p>
 
@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/baramobatare-rgb/ROSHIQ/releases/latest"><img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F%20%20%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C%20%D0%B4%D0%BB%D1%8F%20Windows-B5FF4D?style=for-the-badge&labelColor=B5FF4D" height="40" alt="Скачать для Windows" /></a>
+  <a href="https://github.com/Baramobatare-hash/ROSHIQ/releases/latest"><img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F%20%20%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C%20%D0%B4%D0%BB%D1%8F%20Windows-B5FF4D?style=for-the-badge&labelColor=B5FF4D" height="40" alt="Скачать для Windows" /></a>
 </p>
 
 <p align="center">
@@ -100,7 +100,7 @@ Dota 2 сама отправляет ROSHIQ время матча, героя, �
 
 ## Быстрый старт
 
-1. **Скачайте** `Roshiq-Setup-<версия>.exe` в [Releases](https://github.com/baramobatare-rgb/ROSHIQ/releases/latest) и запустите.
+1. **Скачайте** `Roshiq-Setup-<версия>.exe` в [Releases](https://github.com/Baramobatare-hash/ROSHIQ/releases/latest) и запустите.
    Права администратора и .NET не нужны — всё внутри.
 2. **Пройдите мастер настройки** при первом запуске: язык, роль, связь с игрой (одна кнопка), Steam и режим подсказок.
 3. **Перезапустите Dota 2** и играйте. Оверлей: `F8` — показать/скрыть, `Ctrl+F8` — подробнее, `Ctrl+K` в окне — поиск по программе.
@@ -147,6 +147,12 @@ ROSHIQ использует только Game State Integration — официа
 <br/>
 Да: всё, что описано на этой странице, бесплатно.
 </details>
+
+## Версия 0.24.2 — данные под патч 7.42
+
+Таймеры и магазин сверены с патчем 7.42: Рошан возрождается на минуту быстрее после каждого убийства (до 5 минут), катапульты после 30:00 — каждые 2:30, Терзатель — с 15:00. Убраны удалённые из игры Javelin, Khanda и Helm of the Overlord.
+
+Проект переехал на новый аккаунт GitHub — [Baramobatare-hash/ROSHIQ](https://github.com/Baramobatare-hash/ROSHIQ): обновления программы и данных теперь приходят оттуда, старый адрес в настройках меняется сам.
 
 ## Версия 0.24.1 — тир-лист «в мете»
 

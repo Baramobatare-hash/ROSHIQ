@@ -52,7 +52,7 @@ item_ghost|Ghost Scepter|Гост Скипетр|mid|-|4,5|save,survival|right_c
 item_cyclone|Eul's Scepter of Divinity|Эул|mid|-|2,4,5|mobility,dispel,mana_regen,save|channeling|caster|Развеивание себя, прерывание заклинаний и позиционирование|Self-dispel, interrupts and positioning
 item_lotus_orb|Lotus Orb|Лотус Орб|mid|-|3,4|dispel,save,armor|silence,root,hex|-|Развеивает союзника и отражает направленные заклинания|Dispels an ally and reflects targeted spells
 item_solar_crest|Solar Crest|Солар Крест|mid|-|4,5|armor,armor_reduction,save|-|-|Броня союзнику или снижение брони цели|Armor for an ally or armor reduction on a target
-item_heavens_halberd|Heaven's Halberd|Хэвенс Хальберд|mid|-|3|survival,evasion|right_click|-|Обезоруживает героя, зависящего от атак|Disarms an attack-reliant hero
+item_heavens_halberd|Heaven's Halberd|Хэвенс Хальберд|mid|-|3|survival|right_click|-|Обезоруживает героя, зависящего от атак|Disarms an attack-reliant hero
 item_orchid|Orchid Malevolence|Орхид|mid|-|2,4|silence,mana_regen|caster,mobility,mana_dependent|-|Безмолвие против заклинателей и мобильных героев|Silence vs casters and mobile heroes
 item_diffusal_blade|Diffusal Blade|Диффузал Блейд|mid|-|1|mana_burn,slow|mana_dependent,illusions|right_click|Сжигает ману атаками и замедляет|Burns mana on hit and slows
 item_mekansm|Mekansm|Мекансм|mid|-|4,5|team_heal,armor,aura|-|-|Массовое лечение и броня для команды|Group heal and armor for the team
@@ -117,8 +117,8 @@ item_belt_of_strength|Belt of Strength|Пояс силы|early|catalog|*|-|-|-|�
 item_boots_of_elves|Band of Elvenskin|Эльфийская повязка (Band of Elvenskin)|early|catalog|*|-|-|-|Ловкость; компонент Yasha и Power Treads|Agility; Yasha and Power Treads component
 item_robe|Robe of the Magi|Мантия мага (Robe of the Magi)|early|catalog|*|-|-|-|Интеллект; компонент Kaya и Power Treads|Intelligence; Kaya and Power Treads component
 item_gloves|Gloves of Haste|Перчатки скорости (Gloves of Haste)|early|catalog|*|-|-|-|Скорость атаки; компонент Power Treads и Maelstrom|Attack speed; Power Treads component
-item_chainmail|Chainmail|Кольчуга (Chainmail)|early|catalog|*|-|-|-|Броня; компонент Medallion, Mekansm, Assault|Armor; Mekansm and Assault component
-item_quarterstaff|Quarterstaff|Посох (Quarterstaff)|early|catalog|*|-|-|-|Урон и скорость атаки; компонент Oblivion Staff и Basher|Damage and attack speed; Oblivion Staff component
+item_chainmail|Chainmail|Кольчуга (Chainmail)|early|catalog|*|-|-|-|Броня; компонент Mekansm и Assault|Armor; Mekansm and Assault component
+item_quarterstaff|Quarterstaff|Посох (Quarterstaff)|early|catalog|*|-|-|-|Урон и скорость атаки; компонент Oblivion Staff, Butterfly и MKB|Damage and attack speed; Oblivion Staff component
 item_blades_of_attack|Blades of Attack|Клинки атаки (Blades of Attack)|early|catalog|*|-|-|-|Урон; компонент Phase Boots и Crystalys|Damage; Phase Boots and Crystalys component
 item_lifesteal|Morbid Mask|Морбид Маск|early|catalog|*|-|-|-|Вампиризм; компонент Mask of Madness и Satanic|Lifesteal; Mask of Madness component
 item_cloak|Cloak|Плащ (Cloak)|early|catalog|*|-|-|-|Сопротивление магии; компонент Hood и Glimmer|Magic resistance; Hood and Glimmer component
@@ -135,11 +135,10 @@ item_ogre_axe|Ogre Axe|Огр Акс (Ogre Axe)|mid|catalog|*|-|-|-|Сила; к
 item_blade_of_alacrity|Blade of Alacrity|Клинок ловкости (Blade of Alacrity)|mid|catalog|*|-|-|-|Ловкость; компонент Aghanim's Scepter и Diffusal|Agility; Aghanim's Scepter component
 item_staff_of_wizardry|Staff of Wizardry|Посох волшебника (Staff of Wizardry)|mid|catalog|*|-|-|-|Интеллект; компонент Aghanim's Scepter и Eul|Intelligence; Aghanim's Scepter component
 item_broadsword|Broadsword|Палаш (Broadsword)|mid|catalog|*|-|-|-|Урон; компонент Crystalys и BKB|Damage; Crystalys and BKB component
-item_claymore|Claymore|Клеймор|mid|catalog|*|-|-|-|Урон; компонент Bfury и Shadow Blade|Damage; Battle Fury component
-item_javelin|Javelin|Джавелин|mid|catalog|*|-|-|-|Урон и шанс доп. урона; компонент Maelstrom и MKB|Damage and pierce; Maelstrom and MKB component
+item_claymore|Claymore|Клеймор|mid|catalog|*|-|-|-|Урон; компонент Battle Fury и Shadow Blade|Damage; Battle Fury component
 item_mithril_hammer|Mithril Hammer|Мифриловый молот (Mithril Hammer)|mid|catalog|*|-|-|-|Урон; компонент Desolator, Basher и Maelstrom|Damage; Desolator and Basher component
 item_helm_of_iron_will|Helm of Iron Will|Шлем железной воли (Helm of Iron Will)|mid|catalog|*|-|-|-|Броня и реген; компонент Armlet и Crimson Guard|Armor and regen; Armlet component
-item_talisman_of_evasion|Talisman of Evasion|Талисман уклонения|mid|catalog|*|-|-|-|Уклонение; компонент Butterfly и Heaven's Halberd|Evasion; Butterfly component
+item_talisman_of_evasion|Talisman of Evasion|Талисман уклонения|mid|catalog|*|-|-|-|Уклонение; компонент Butterfly и Skypiercer|Evasion; Butterfly component
 item_platemail|Platemail|Латы (Platemail)|mid|catalog|*|-|-|-|Броня; компонент Assault и Shiva|Armor; Assault and Shiva component
 item_hyperstone|Hyperstone|Гиперстоун|mid|catalog|*|-|-|-|Скорость атаки; компонент Assault и Moon Shard|Attack speed; Assault component
 item_ultimate_orb|Ultimate Orb|Ультимейт Орб|mid|catalog|*|-|-|-|Все характеристики; компонент Skadi, Manta и Linken|All stats; Skadi and Linken component
@@ -155,23 +154,20 @@ item_oblivion_staff|Oblivion Staff|Облвион Стафф|mid|catalog|*|-|-|-
 item_lesser_crit|Crystalys|Кристалис (Crystalys)|mid|catalog|*|-|-|-|Критический урон; основа Daedalus|Critical strikes; builds into Daedalus
 item_kaya|Kaya|Кая (Kaya)|mid|catalog|*|-|-|-|Усиление способностей и маны; основа Кая и Санге / Яша и Кая|Spell and mana amplification
 item_yasha|Yasha|Яша (Yasha)|mid|catalog|*|-|-|-|Ловкость, скорость атаки и передвижения; основа Manta|Agility, attack and move speed; builds into Manta
-item_sange|Sange|Санге (Sange)|mid|catalog|*|-|-|-|Сила и сопротивление эффектам; основа Heaven's Halberd|Strength and status resistance
+item_sange|Sange|Санге (Sange)|mid|catalog|*|-|-|-|Сила и сопротивление эффектам; компонент Sange and Yasha и Skypiercer|Strength and status resistance
 item_yasha_and_kaya|Yasha and Kaya|Яша и Кая|mid|catalog|*|-|-|-|Скорость атаки и усиление способностей|Attack speed and spell amplification
 item_falcon_blade|Falcon Blade|Фалкон Блейд|early|catalog|*|-|-|-|Урон, здоровье и мана на линии|Damage, health and mana in lane
 item_urn_of_shadows|Urn of Shadows|Урна теней (Urn)|early|catalog|*|-|-|-|Заряды за убийства: лечение или урон; основа Spirit Vessel|Kill charges for heal or damage
 item_buckler|Buckler|Баклер|early|catalog|*|-|-|-|Броня для всей команды; компонент Mekansm и Pavise|Team armor; Mekansm component
 item_headdress|Headdress|Хеддресс|early|catalog|*|-|-|-|Реген здоровья вокруг; компонент Mekansm и Pipe|Area health regen; Mekansm component
 item_hood_of_defiance|Hood of Defiance|Худ|mid|catalog|*|-|-|-|Магическое сопротивление; компонент Pipe и Eternal Shroud|Magic resistance; Pipe component
-item_helm_of_the_dominator|Helm of the Dominator|Хелм оф Доминатор|mid|catalog|*|-|-|-|Подчинение крипа; основа Helm of the Overlord|Dominate a creep
-item_helm_of_the_overlord|Helm of the Overlord|Хелм оф Оверлорд|late|catalog|*|-|-|-|Подчинение древнего крипа|Dominate an ancient creep
+item_helm_of_the_dominator|Helm of the Dominator|Хелм оф Доминатор|mid|catalog|*|-|-|-|Подчинение крипа|Dominate a creep
 item_soul_booster|Soul Booster|Соул Бустер|mid|catalog|*|-|-|-|Здоровье, мана и реген; компонент Bloodstone и Octarine|Health, mana and regen; Octarine component
 item_witch_blade|Witch Blade|Витч Блейд|mid|catalog|*|-|-|-|Яд от атак и интеллект; основа Parasma|Poison on hit and intelligence
-item_revenants_brooch|Revenant's Brooch|Ревенантс Брошь|late|catalog|*|-|-|-|Атаки наносят магический урон|Attacks deal magic damage
 item_harpoon|Harpoon|Гарпун|late|catalog|*|-|-|-|Притягивает к цели, урон по атаке|Pulls you to the target
 item_disperser|Disperser|Дисперсер|late|catalog|*|-|-|-|Развеивание и ускорение союзника|Dispel and ally haste
-item_angels_demise|Khanda|Ханда|late|catalog|*|-|-|-|Критический урон способностями|Spell critical damage
 item_devastator|Parasma|Парасма|late|catalog|*|-|-|-|Яд от атак и снижение маг. сопротивления|Poison on hit and magic resistance reduction
-item_phylactery|Phylactery|Филактерия|mid|catalog|*|-|-|-|Доп. урон и замедление от способностей; основа Khanda|Bonus spell damage and slow
+item_phylactery|Phylactery|Филактерия|mid|catalog|*|-|-|-|Доп. урон и замедление от способностей; основа Caduceus|Bonus spell damage and slow
 item_meteor_hammer|Meteor Hammer|Метеор Хаммер|mid|catalog|*|-|-|-|Урон по зданиям и оглушение|Building damage and a stun
 item_gungir|Gleipnir|Глейпнир|late|catalog|*|-|-|-|Сеть по области и цепная молния|Area root and chain lightning
 item_arcane_blink|Arcane Blink Dagger|Аркейн Блинк|late|catalog|*|-|-|-|Блинк и ускорение заклинаний|Blink and faster casting
@@ -184,3 +180,11 @@ item_travel_boots_2|Boots of Travel 2|Тревел Бутсы 2|late|catalog|*|-
 item_aegis|Aegis of the Immortal|Аегис|late|catalog|*|-|-|-|Одно воскрешение после смерти|One revival after death
 item_cheese|Cheese|Сыр|late|catalog|*|-|-|-|Мгновенно восстанавливает здоровье и ману|Instantly restores health and mana
 item_refresher_shard|Refresher Shard|Рефрешер Шард|late|catalog|*|-|-|-|Сбрасывает перезарядку один раз|Refreshes cooldowns once
+
+# Новые предметы 7.42 (ключи из каталога Valve)
+item_bloodslinger|Bloodslinger|Bloodslinger|early|catalog|*|-|-|-|Бросает гранату, которая наносит урон и замедляет по области|Throws a grenade that damages and slows enemies in an area
+item_caduceus|Caduceus|Caduceus|late|catalog|*|-|-|-|Улучшение Force Staff: направленные заклинания усиливаются против врагов и лечат союзников|Force Staff upgrade: targeted spells hurt enemies or heal allies
+item_ristuls_devotion|Ristul's Devotion|Ristul's Devotion|mid|catalog|*|-|-|-|Даёт союзникам ауру с вампиризмом от атак и заклинаний|Gives allies an aura with attack and spell lifesteal
+item_starforge|Starforge|Starforge|late|catalog|*|-|-|-|Улучшение Meteor Hammer: поджигает врагов после окончания эффекта контроля|Meteor Hammer upgrade: burns enemies after a disable ends
+item_skypiercer|Skypiercer|Skypiercer|late|catalog|*|-|-|-|Улучшение Heaven's Halberd с уклонением и ускоренной перезарядкой обезоруживания рядом с врагами|Heaven's Halberd upgrade with evasion and faster Disarm cooldown near enemies
+item_berserkers_sabatons|Sabatons of Mordiggian|Sabatons of Mordiggian|late|catalog|*|-|-|-|Объединяет Phase Boots и Armlet of Mordiggian|Combines Phase Boots and Armlet of Mordiggian

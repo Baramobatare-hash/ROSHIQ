@@ -31,7 +31,7 @@ public partial class CrashReportWindow : Window
     {
         CopyReport();
         var repo = App.Host.Settings.Current.Data.UpdateRepo;
-        if (string.IsNullOrWhiteSpace(repo)) repo = "baramobatare-rgb/ROSHIQ";
+        if (string.IsNullOrWhiteSpace(repo)) repo = "Baramobatare-hash/ROSHIQ";
         var title = Uri.EscapeDataString($"Сбой ROSHIQ {AppUpdater.CurrentVersion}");
         var body = Uri.EscapeDataString(Loc.T("crash_issue_body"));
         DiagnosticsRunner.OpenPath($"https://github.com/{repo}/issues/new?title={title}&body={body}");

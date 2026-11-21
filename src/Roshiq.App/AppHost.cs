@@ -523,7 +523,7 @@ public sealed class AppHost : IDisposable
             _deferredEarly.Clear();
             _alertActive = Array.Empty<string>();
             _timerAnnouncer.Reset();
-            Roshan.Clear();
+            Roshan.Reset();
             EnemyGlyph.Clear();
             _macro.Reset();
             _roleDetector.Reset();
@@ -1799,21 +1799,21 @@ public sealed class AppHost : IDisposable
         }
         if (Roshan.KilledAt is int k && clock.Value - k < 10)
         {
-            Roshan.Clear();
+            Roshan.Undo();
             ShowEventToast(L.Get("rosh_header").ToUpperInvariant(), L.Get("rosh_cleared"), priority: TipPriority.Urgent, kind: "rosh_mark", ttlSec: 8);
         }
         else
         {
             Roshan.MarkKilled(clock.Value);
             ShowEventToast(L.Get("rosh_header").ToUpperInvariant(), L.Format("rosh_marked",
-                GameTimers.Clock(clock.Value + RoshanTracker.RespawnMinSec), GameTimers.Clock(clock.Value + RoshanTracker.RespawnMaxSec)),
+                GameTimers.Clock(clock.Value + Roshan.CurrentRespawnMin), GameTimers.Clock(clock.Value + Roshan.CurrentRespawnMax)),
                 priority: TipPriority.Urgent, kind: "rosh_mark", ttlSec: 8);
         }
         RefreshOverlay();
         RaiseChanged();
     }
 
-    /// <summary>Горячая клавиша «Враги нажали глиф»: таймер 5 минут; повторное нажатие в течение 10 секунд снимает отметку.</summary>
+    /// <summary>Горячая клавиша «Враги нажали глиф»: таймер заряда; повторное нажатие до истечения 7 секунд отменяет отметку.</summary>
     public void ToggleGlyphMark()
     {
         var L = Loc.Instance;
@@ -1823,15 +1823,15 @@ public sealed class AppHost : IDisposable
             ShowEventToast(header, L.Get("rosh_need_clock"), warning: true, priority: TipPriority.Urgent, kind: "glyph_mark", ttlSec: 8);
             return;
         }
-        if (EnemyGlyph.UsedAt is int u && clock - u < 10)
+        if (EnemyGlyph.UsedAt is int u && clock - u is >= 0 and < GlyphTracker.ReuseSec)
         {
-            EnemyGlyph.Clear();
+            EnemyGlyph.Undo();
             ShowEventToast(header, L.Get("rosh_cleared"), priority: TipPriority.Urgent, kind: "glyph_mark", ttlSec: 8);
         }
         else
         {
             EnemyGlyph.MarkUsed(clock);
-            ShowEventToast(header, L.Format("glyph_marked", GameTimers.Clock(clock + GlyphTracker.CooldownSec)),
+            ShowEventToast(header, L.Format("glyph_marked", GameTimers.Clock(clock + EnemyGlyph.ReadyIn(clock).GetValueOrDefault())),
                 priority: TipPriority.Urgent, kind: "glyph_mark", ttlSec: 10);
         }
         RefreshOverlay();

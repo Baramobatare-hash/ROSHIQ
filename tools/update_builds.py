@@ -70,7 +70,7 @@ def get_json(path, cache_dir, cache_name):
     last = None
     for attempt in range(5):
         try:
-            req = urllib.request.Request(API + path, headers={"User-Agent": "ROSHIQ-data-update (github.com/baramobatare-rgb/ROSHIQ)"})
+            req = urllib.request.Request(API + path, headers={"User-Agent": "ROSHIQ-data-update (github.com/Baramobatare-hash/ROSHIQ)"})
             with urllib.request.urlopen(req, timeout=30) as r:
                 return json.load(r)
         except urllib.error.HTTPError as e:
