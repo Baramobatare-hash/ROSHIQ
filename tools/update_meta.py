@@ -355,6 +355,7 @@ def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts, bo
     s_sample = max(list(s_agg.values()) + [1])           # тот же приём: самый частый стартовый предмет — почти в каждой игре
     starts = [k for k, n in sorted(s_agg.items(), key=lambda kv: -kv[1])
               if n / s_sample >= START_SHARE and (consts.get(k, {}).get("cost") or 0) <= 600
+              and known[k]["phase"] == "start"                       # в базе ROSHIQ помечен стартовым (Tango, Branch, Circlet…)
               and not (pos <= 3 and k in SUPPORT_ONLY) and known[k]["group"] != "boots"]   # сапоги — одна пара, в ранней игре
     if pos == 5 and "item_ward_observer" in known and "item_ward_observer" not in starts:
         starts = ["item_ward_observer"] + starts                 # пятёрка всегда начинает с обсервера
