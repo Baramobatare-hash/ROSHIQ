@@ -200,42 +200,38 @@ def all_components(key, consts, seen=None):
     return seen
 
 
+RANK_PAIRS = {"HG": "HERALD,GUARDIAN", "CA": "CRUSADER,ARCHON", "LA": "LEGEND,ANCIENT", "DI": "DIVINE,IMMORTAL"}
+
+
 def fetch_meta(token):
-    """{(hero, pos, bracket): (matches, wins)} — bracket: HG/CA/LA/DI/ALL; pos 1..5."""
-    fields = "heroId position bracketBasicIds matchCount winCount"
-    rows = []
-    # по одной группе рангов за запрос: так bracketBasicIds в ответе может быть пустым — подставляем сами
-    for br in BRACKETS:
-        variants = [
-            "query{ heroStats{ stats(groupByPosition:true, groupByBracket:true, bracketBasicIds:[%s]){ %s } } }" % (br, fields),
-            "query{ heroStats{ stats(heroIds:[%s], groupByPosition:true, bracketBasicIds:[%s]){ %s } } }"
-            % (",".join(str(i) for i in range(1, 160)), br, fields),
-        ]
-        got = []
-        for q in variants:
-            try:
-                got = gql(token, q)["heroStats"]["stats"] or []
-            except Exception as e:
-                print(f"  stats {br}: ошибка {str(e)[:300]}")
-                got = []
-            print(f"  stats {br}: строк {len(got)}; пример: {json.dumps(got[:2], ensure_ascii=False)[:300]}")
-            if len({r.get('heroId') for r in got}) >= 100:
-                break
-        for r in got:
-            if not r.get("bracketBasicIds"):
-                r["bracketBasicIds"] = br
-        rows += got
-        time.sleep(0.5)
+    """{(hero, pos, bracket): (matches, wins)} за последнюю неделю — bracket: HG/CA/LA/DI/ALL; pos 1..5 (heroStats.winWeek)."""
+    hero_ids = ",".join(str(i) for i in range(1, 160))
     meta = {}
-    for r in rows:
-        pos = r.get("position") or ""
-        if not pos.startswith("POSITION_") or r.get("bracketBasicIds") not in BRACKET_CODE:
-            continue
-        p = int(pos[-1])
-        m, w = int(r.get("matchCount") or 0), int(r.get("winCount") or 0)
-        for b in (BRACKET_CODE[r["bracketBasicIds"]], "ALL"):
-            om, ow = meta.get((r["heroId"], p, b), (0, 0))
-            meta[(r["heroId"], p, b)] = (om + m, ow + w)
+    for code, ranks in RANK_PAIRS.items():
+        for pos in range(1, 6):
+            q = ("query{ heroStats{ winWeek(heroIds:[%s], positionIds:[POSITION_%d], bracketIds:[%s]){ week heroId matchCount winCount } } }"
+                 % (hero_ids, pos, ranks))
+            try:
+                rows = gql(token, q)["heroStats"]["winWeek"] or []
+            except Exception as e:
+                print(f"  winWeek {code} поз.{pos}: ошибка {str(e)[:300]}")
+                continue
+            if not rows:
+                print(f"  winWeek {code} поз.{pos}: пусто")
+                continue
+            last = max(int(r["week"]) for r in rows)
+            got = 0
+            for r in rows:
+                if int(r["week"]) != last:
+                    continue                                   # только последняя неделя — ближе к текущему патчу
+                m, w = int(r.get("matchCount") or 0), int(r.get("winCount") or 0)
+                for b in (code, "ALL"):
+                    om, ow = meta.get((r["heroId"], pos, b), (0, 0))
+                    meta[(r["heroId"], pos, b)] = (om + m, ow + w)
+                got += 1
+            if code == "HG" and pos == 1:
+                print(f"  winWeek пример: неделя {last}, строк {got}; {json.dumps(rows[:2])[:200]}")
+            time.sleep(0.4)
     return meta
 
 
