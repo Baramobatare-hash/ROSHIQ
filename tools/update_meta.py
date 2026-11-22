@@ -569,9 +569,45 @@ def bump_version(day):
     print("dataVersion=" + stamp)
 
 
+def probe_items(token):
+    """Диагностика покупок: один и тот же герой/позиция разными вариантами запроса — топ предметов по числу матчей."""
+    _, by_id = stratz_items(token)
+    br = ",".join(BUILD_BRACKETS)
+    fields = "itemId instance time matchCount winCount"
+    variants = {
+        "full+start (как утром)": "full: itemFullPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s], matchLimit:0){ %s } start: itemStartingPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s]){ itemId matchCount }",
+        "full один": "full: itemFullPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s], matchLimit:0){ %s }",
+        "full без matchLimit": "full: itemFullPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s]){ %s }",
+        "full без рангов и позиции": "full: itemFullPurchase(heroId:%d){ %s }",
+    }
+    for hero_id, pos, name in ((1, 1, "Anti-Mage"), (8, 1, "Juggernaut"), (31, 5, "Lich")):
+        for label, body in variants.items():
+            if label == "full+start (как утром)":
+                q = body % (hero_id, pos, br, fields, hero_id, pos, br)
+            elif label == "full без рангов и позиции":
+                q = body % (hero_id, fields)
+            else:
+                q = body % (hero_id, pos, br, fields)
+            try:
+                rows = gql(token, "query{ heroStats{ %s } }" % q)["heroStats"]["full"] or []
+            except Exception as e:
+                print(f"{name} поз.{pos} [{label}]: ошибка {str(e)[:200]}")
+                continue
+            agg = {}
+            for r in rows:
+                if int(r.get("instance") or 0) != 0:
+                    continue
+                k = by_id.get(int(r["itemId"]), str(r["itemId"]))
+                agg[k] = agg.get(k, 0) + int(r.get("matchCount") or 0)
+            top = sorted(agg.items(), key=lambda x: -x[1])[:12]
+            print(f"{name} поз.{pos} [{label}]: строк {len(rows)}; топ: " + ", ".join(f"{k.replace('item_', '')}:{n}" for k, n in top))
+            time.sleep(0.5)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--probe", action="store_true")
+    ap.add_argument("--probe-items", action="store_true")
     args = ap.parse_args()
     token = (os.environ.get("STRATZ_TOKEN") or "").strip()
     if not token:
@@ -579,6 +615,9 @@ def main():
         return
     if args.probe:
         probe(token)
+        return
+    if args.probe_items:
+        probe_items(token)
         return
     full(token)
 
