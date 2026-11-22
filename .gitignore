@@ -20,3 +20,8 @@ src/Roshiq.App/Assets/HeroArt.zip
 
 # черновые снимки окон для сайта
 docs/site/screens/*-new.png
+
+# служебные логи локальной сборки и черновые копии настроек GitHub Actions
+install.log
+update-local.log
+tools/workflow/

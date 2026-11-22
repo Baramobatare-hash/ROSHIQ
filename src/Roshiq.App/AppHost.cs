@@ -1232,6 +1232,10 @@ public sealed class AppHost : IDisposable
         {
             _ = RefreshSteamProfileAsync();
             _ = AutoImportOnceAsync(null);
+            // Аккаунт привязан, но сеть запрещена — история из OpenDota не придёт; говорим прямо, где это включить.
+            if (!Settings.Current.Data.AllowOnlineStats && via != "manual")
+                ShowEventToast(Loc.T("steam_header").ToUpperInvariant(), Loc.T("hist_online_off_hint"),
+                    priority: TipPriority.Background, kind: "steam", ttlSec: 120);
         }
     }
 
@@ -1444,6 +1448,12 @@ public sealed class AppHost : IDisposable
         {
             using var client = new OpenDotaClient(s.Data.OpenDotaApiKey);
             var rows = await client.GetRecentMatchesAsync(account, CancellationToken.None);
+            // OpenDota ещё не видел матчей этого игрока — просим подтянуть их из Steam; следующая попытка их уже получит.
+            if (rows.Count == 0 && waitFor == null && await client.RefreshPlayerAsync(account, CancellationToken.None))
+            {
+                await Task.Delay(TimeSpan.FromSeconds(15));
+                rows = await client.GetRecentMatchesAsync(account, CancellationToken.None);
+            }
             int added = History.Import(rows).Added;
             bool? visible = rows.Count > 0 ? true : History.All().Any(m => m.Source == "GSI") ? false : null;
             if (visible != null && visible != s.Data.PublicMatchData)

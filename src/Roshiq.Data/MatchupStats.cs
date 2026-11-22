@@ -372,6 +372,23 @@ public sealed class OpenDotaClient : IDisposable
         }
     }
 
+    /// <summary>Попросить OpenDota заново скачать историю игрока из Steam (нужно, если OpenDota ещё не видел его матчей).</summary>
+    public async Task<bool> RefreshPlayerAsync(long accountId, CancellationToken ct)
+    {
+        var url = $"{BaseUrl}/players/{accountId}/refresh";
+        try
+        {
+            using var response = await _http.PostAsync(WithKey(url), content: null, ct).ConfigureAwait(false);
+            NetworkLog.Record("POST", url, ((int)response.StatusCode).ToString(System.Globalization.CultureInfo.InvariantCulture));
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            NetworkLog.Record("POST", url, "ошибка: " + ex.Message);
+            return false;
+        }
+    }
+
     /// <summary>0.22.1: строка истории для игрока accountId из полного матча (как в recentMatches). null — его нет в матче.</summary>
     public async Task<RecentMatchRow?> GetMatchRowAsync(long matchId, long accountId, CancellationToken ct)
     {

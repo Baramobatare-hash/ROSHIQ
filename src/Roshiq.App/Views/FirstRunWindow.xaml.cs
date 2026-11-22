@@ -18,6 +18,9 @@ public partial class FirstRunWindow : Window
     private const int Steps = 6;
     private int _step;
     private bool _ready;
+    /// <summary>0.25: сначала экран быстрой настройки; «Настроить вручную» переключает на прежние шаги.</summary>
+    private bool _quick = true;
+    private bool _quickDone;
     private HintPreset _preset = HintPreset.Normal;
 
     public FirstRunWindow()
@@ -25,6 +28,7 @@ public partial class FirstRunWindow : Window
         InitializeComponent();
         var s = App.Host.Settings.Current;
         (s.Language == AppLanguage.English ? LangEn : LangRu).IsChecked = true;
+        (s.Language == AppLanguage.English ? QuickEn : QuickRu).IsChecked = true;
         BuildThemes(s.Theme);
         BuildRoles(s.Position);
         OnlineBox.IsChecked = s.Data.AllowOnlineStats;
@@ -40,6 +44,19 @@ public partial class FirstRunWindow : Window
     private void ShowStep()
     {
         var L = Loc.Instance;
+        QuickPanel.Visibility = _quick ? Visibility.Visible : Visibility.Collapsed;
+        if (_quick)
+        {
+            StepLabel.Text = L.Get("fr_quick_eyebrow").ToUpperInvariant();
+            StepTitle.Text = L.Get(_quickDone ? "fr_quick_done_title" : "fr_title_0");
+            foreach (var panel in new FrameworkElement[] { Step0, Step1, Step2, Step3, Step4, Step5 }) panel.Visibility = Visibility.Collapsed;
+            BackButton.Visibility = Visibility.Collapsed;
+            NextButton.Visibility = _quickDone ? Visibility.Visible : Visibility.Collapsed;
+            NextButton.Content = L.Get("fr_finish").ToUpperInvariant();
+            ProgressFill.Width = _quickDone ? Math.Max(8, ActualWidth > 0 ? ActualWidth - 56 : 700) : 8;
+            return;
+        }
+        NextButton.Visibility = Visibility.Visible;
         StepLabel.Text = L.Format("fr_step", _step + 1, Steps).ToUpperInvariant();
         StepTitle.Text = L.Get("fr_title_" + _step);
         var panels = new FrameworkElement[] { Step0, Step1, Step2, Step3, Step4, Step5 };
@@ -170,6 +187,112 @@ public partial class FirstRunWindow : Window
     private void UpdatePresetText() =>
         PresetDescription.Text = Loc.T("preset_desc_" + _preset.ToString().ToLowerInvariant());
 
+    // ------------------------------------------------------------------ 0.25: быстрая настройка
+
+    private void QuickLang_Checked(object sender, RoutedEventArgs e)
+    {
+        if (!_ready) return;
+        bool en = QuickEn.IsChecked == true;
+        (en ? LangEn : LangRu).IsChecked = true;   // общий обработчик сохраняет язык
+    }
+
+    private void Manual_Click(object sender, RoutedEventArgs e)
+    {
+        _quick = false;
+        _step = 0;
+        ShowStep();
+    }
+
+    /// <summary>
+    /// Всё, что раньше делали шестью шагами: интернет и обычный режим подсказок, связь с игрой, аккаунт Steam с этого компьютера.
+    /// Роль определяется в матче сама, оверлей стоит на стандартном месте; всё меняется потом в настройках.
+    /// </summary>
+    private async void Quick_Click(object sender, RoutedEventArgs e)
+    {
+        var L = Loc.Instance;
+        QuickButton.IsEnabled = false;
+        ManualLink.Visibility = Visibility.Collapsed;
+        QuickResults.Children.Clear();
+
+        // 1. интернет и режим подсказок — до привязки Steam, иначе история не загрузится
+        App.Host.Settings.Update(s =>
+        {
+            s.Data.AllowOnlineStats = true;
+            HintPresets.Apply(s, HintPreset.Normal);
+            s.SetupVersion = 1;
+        });
+        AddResult(true, L.Get("fr_quick_online"));
+
+        // 2. связь с игрой
+        var root = SteamLocator.FindDotaRoot();
+        if (root == null) AddResult(false, L.Get("fr_quick_gsi_nodota"));
+        else
+        {
+            try
+            {
+                var g = App.Host.Settings.Current.Gsi;
+                GsiConfigWriter.Write(root, g.Port, g.Token);
+                if (!g.Enabled) App.Host.Settings.Update(s => s.Gsi.Enabled = true);
+                AddResult(true, L.Get("fr_quick_gsi_ok"));
+            }
+            catch (Exception ex) { AddResult(false, L.Format("fr_quick_gsi_fail", ex.Message)); }
+        }
+
+        // 3. аккаунт Steam: тот, кто последним входил в Steam на этом компьютере
+        var users = SteamLink.LocalUsers();
+        var me = users.FirstOrDefault(u => u.MostRecent) ?? (users.Count == 1 ? users[0] : null);
+        if (me != null)
+        {
+            App.Host.LinkSteam(me.SteamId64, "local", me.PersonaName);
+            AddResult(true, L.Format("fr_quick_steam_ok", me.Display));
+        }
+        else if (App.Host.SteamAccount != null) AddResult(true, L.Get("fr_quick_steam_kept"));
+        else
+        {
+            AddResult(false, L.Get("fr_quick_steam_none"));
+            QuickSteamSignIn.Visibility = Visibility.Visible;
+        }
+
+        // 4. роль и оверлей — по умолчанию
+        AddResult(true, L.Get("fr_quick_role"));
+        AddResult(true, L.Get("fr_quick_overlay"));
+
+        _ = App.Host.RunOnlineChecksAsync(force: false);
+        await Task.Yield();
+        _quickDone = true;
+        // после настройки остаётся только итог и «Готово»
+        foreach (var el in new FrameworkElement[] { QuickButton, QuickLangRow, QuickText, QuickList, SkipButton }) el.Visibility = Visibility.Collapsed;
+        ShowStep();
+    }
+
+    private async void QuickSteamSignIn_Click(object sender, RoutedEventArgs e)
+    {
+        QuickSteamSignIn.IsEnabled = false;
+        try
+        {
+            var id = await SteamLink.SignInAsync(CancellationToken.None);
+            if (id == null) { AddResult(false, Loc.T("steam_signin_failed")); return; }
+            App.Host.LinkSteam(id, "openid");
+            AddResult(true, Loc.T("steam_linked"));
+            QuickSteamSignIn.Visibility = Visibility.Collapsed;
+        }
+        finally { QuickSteamSignIn.IsEnabled = true; }
+    }
+
+    private void AddResult(bool ok, string text)
+    {
+        var row = new DockPanel { Margin = new Thickness(0, 0, 0, 6) };
+        var mark = new TextBlock
+        {
+            Text = ok ? "\u2713" : "!", Width = 22, FontWeight = FontWeights.Bold,
+            Foreground = (System.Windows.Media.Brush)FindResource(ok ? "Accent" : "Red")
+        };
+        DockPanel.SetDock(mark, Dock.Left);
+        row.Children.Add(mark);
+        row.Children.Add(new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, Style = (Style)FindResource("Value") });
+        QuickResults.Children.Add(row);
+    }
+
     // ------------------------------------------------------------------ навигация
 
     private void Back_Click(object sender, RoutedEventArgs e)
@@ -179,6 +302,11 @@ public partial class FirstRunWindow : Window
 
     private void Next_Click(object sender, RoutedEventArgs e)
     {
+        if (_quick)
+        {
+            if (_quickDone) { DialogResult = true; Close(); }
+            return;
+        }
         if (_step < Steps - 1) { _step++; ShowStep(); return; }
         Finish();
     }

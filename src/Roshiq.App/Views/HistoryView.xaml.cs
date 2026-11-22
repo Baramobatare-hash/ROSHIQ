@@ -148,6 +148,8 @@ public partial class HistoryView : UserControl, IRefreshable
         }
         CountText.Text = all.Count == 0 ? L.Get("hist_empty_short") : L.Format("hist_count", all.Count);
         SteamIdBox.Text = App.Host.Settings.Current.Data.SteamAccountId ?? "";
+        if (string.IsNullOrEmpty(ImportStatus.Text) && !App.Host.Settings.Current.Data.AllowOnlineStats)
+            ImportStatus.Text = L.Get("hist_online_off_hint");
         _ready = true;
 
         var toSelect = MatchList.Items.OfType<Choice<MatchRecord>>().FirstOrDefault(c => c.Value.Id == keep)
@@ -696,17 +698,36 @@ public partial class HistoryView : UserControl, IRefreshable
         var d = App.Host.Settings.Current.Data;
         var account = SteamIds.ToAccountId(SteamIdBox.Text);
         if (account == null) { ImportStatus.Text = L.Get("hist_steam_invalid"); return; }
-        if (!d.AllowOnlineStats) { ImportStatus.Text = L.Get("hist_need_online"); return; }
-        App.Host.Settings.Update(s => s.Data.SteamAccountId = SteamIdBox.Text.Trim());
+        if (!d.AllowOnlineStats)
+        {
+            // Нажатие «Загрузить» — явное желание получить данные: спрашиваем разрешение прямо здесь, а не отправляем в настройки.
+            if (MessageBox.Show(L.Get("hist_online_ask"), "ROSHIQ", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            {
+                ImportStatus.Text = L.Get("hist_need_online");
+                return;
+            }
+            App.Host.Settings.Update(s => s.Data.AllowOnlineStats = true);
+            _ = App.Host.RunOnlineChecksAsync(force: false);
+        }
+        // Свой аккаунт — через общую привязку (профиль, медаль, статистика героев), а не только запись в поле.
+        if (App.Host.SteamAccount != account.Value) App.Host.LinkSteam(account.Value.ToString(System.Globalization.CultureInfo.InvariantCulture), "manual");
         ImportButton.IsEnabled = false;
         ImportStatus.Text = L.Get("hist_importing");
         try
         {
-            using var client = new OpenDotaClient(d.OpenDotaApiKey);
-            var rows = await client.GetRecentMatchesAsync(account.Value, CancellationToken.None);
+            using var client = new OpenDotaClient(App.Host.Settings.Current.Data.OpenDotaApiKey);
+            var waiting = new Progress<int>(sec => ImportStatus.Text = L.Format("hist_import_waiting", sec));
+            var fetched = await HistoryFetch.RunAsync(client, account.Value, waiting, CancellationToken.None);
+            if (fetched.Outcome != HistoryFetchOutcome.Ok)
+            {
+                ImportStatus.Text = L.Get(HistoryFetch.MessageKey(fetched.Outcome));
+                if (fetched.Outcome == HistoryFetchOutcome.Hidden) App.Host.Settings.Update(s => s.Data.PublicMatchData = false);
+                return;
+            }
+            var rows = fetched.Rows;
             var result = App.Host.History.Import(rows);
-            ImportStatus.Text = rows.Count == 0 ? L.Get("hist_import_empty")
-                : result.Failed > 0 ? L.Format("hist_import_done_failed", result.Added, result.Updated, result.Failed, rows.Count)
+            App.Host.Settings.Update(s => s.Data.PublicMatchData = true);
+            ImportStatus.Text = result.Failed > 0 ? L.Format("hist_import_done_failed", result.Added, result.Updated, result.Failed, rows.Count)
                 : L.Format("hist_import_done2", result.Added, result.Updated, rows.Count);
         }
         catch (Exception ex)
