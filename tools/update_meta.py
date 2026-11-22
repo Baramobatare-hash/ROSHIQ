@@ -237,11 +237,12 @@ def fetch_meta(token):
 
 
 def fetch_items(token, hero_id, pos):
-    """Покупки (itemFullPurchase) и отдельно сапоги: в одном запросе с сапогами STRATZ отдаёт пустые покупки."""
+    """Покупки и стартовые покупки одним запросом (так проверено 22.11 — сборки адекватные), сапоги — отдельно."""
     br = ",".join(BUILD_BRACKETS)
-    q = ("query{ heroStats{ itemFullPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s], matchLimit:0){ itemId instance time matchCount winCount } } }"
-         % (hero_id, pos, br))
-    full = gql(token, q)["heroStats"]["itemFullPurchase"] or []
+    q = ("query{ heroStats{ full: itemFullPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s], matchLimit:0){ itemId instance time matchCount winCount }"
+         " start: itemStartingPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s]){ itemId instance wasGiven matchCount winCount } } }"
+         % (hero_id, pos, br, hero_id, pos, br))
+    d = gql(token, q)["heroStats"]
     boots = []
     if BOOTS_OK[0]:
         try:
@@ -251,7 +252,7 @@ def fetch_items(token, hero_id, pos):
         except Exception as e:
             print(f"  сапоги STRATZ недоступны: {str(e)[:200]}")
             BOOTS_OK[0] = False
-    return full, [], boots
+    return d.get("full") or [], d.get("start") or [], boots
 
 
 BOOTS_OK = [True]
@@ -438,11 +439,19 @@ def full(token):
     known = {}
     for r in read_rows("items.txt", 6):
         known[r[0]] = {"catalog": r[4] == "catalog", "group": r[4], "phase": r[3]}
+    # id предметов — только из STRATZ: покупки тоже из STRATZ, и номера должны совпадать с их справочником.
+    # Цены и компоненты — из OpenDota (точнее), где их нет — из STRATZ.
+    s_consts, by_id = stratz_items(token)
     try:
-        consts, by_id = opendota_items()
+        od_consts, od_by_id = opendota_items()
+        diff = sum(1 for i, k in by_id.items() if i in od_by_id and od_by_id[i] != k)
+        print(f"  id предметов: STRATZ {len(by_id)}, OpenDota {len(od_by_id)}, расходятся {diff}")
+        consts = dict(s_consts)
+        for k, v in od_consts.items():
+            consts[k] = {**consts.get(k, {}), **v}
     except Exception as e:
-        print(f"OpenDota недоступен ({str(e)[:150]}) — справочник предметов берём из STRATZ")
-        consts, by_id = stratz_items(token)
+        print(f"OpenDota недоступен ({str(e)[:150]}) — цены и компоненты берём из STRATZ")
+        consts = s_consts
     if len(by_id) < 150:
         print("справочник предметов слишком мал — файлы не меняю")
         return
@@ -503,6 +512,16 @@ def full(token):
     print(f"сборки STRATZ: {len(built)} (герой, позиция), запросов: {calls}")
     if len(built) < 150:
         print("слишком мало сборок — hero_builds.txt не меняю")
+        return
+    # проверка здравого смысла: почти у каждого героя есть сапоги и Magic Wand / сапоги в ранней игре.
+    # Если нет — данные перепутаны (например, id предметов не совпали), файл не трогаем.
+    def sane(b):
+        keys = [k for ph in ("early", "mid", "late") for k in b.get(ph, [])]
+        return any(known.get(k, {}).get("group") == "boots" for k in keys)
+    ok = sum(1 for b in built.values() if sane(b))
+    print(f"проверка: сапоги есть в {ok} из {len(built)} сборок")
+    if ok < 0.85 * len(built):
+        print("сборки не прошли проверку здравого смысла — hero_builds.txt не меняю")
         return
 
     # hero_builds.txt: сборки STRATZ заменяют строки для своих (герой, позиция); остальное — из прежнего файла (OpenDota)
