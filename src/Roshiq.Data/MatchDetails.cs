@@ -22,6 +22,11 @@ public sealed record HeroKill(int Time, bool ByYourTeam, bool VictimYourTeam);
 /// <summary>0.22.0: событие матча: вышка, барак, трон (Kind = tower/rax/fort, Tier, Lane) или Рошан (Kind = roshan). Ours — здание вашей команды / Рошана убили вы.</summary>
 public sealed record MatchObjective(int Time, string Kind, bool Ours, int Tier, string Lane);
 
+/// <summary>0.25.0: строка таблицы матча — один из десяти игроков (как сводка матча на STRATZ). Предметы — числовые id OpenDota.</summary>
+public sealed record MatchPlayer(int HeroId, bool IsRadiant, bool IsYou, string? Name, int Level, int Kills, int Deaths, int Assists,
+    int NetWorth, int LastHits, int Denies, int Gpm, int Xpm, int HeroDamage, int TowerDamage, int HeroHealing,
+    IReadOnlyList<int> ItemIds, int NeutralId);
+
 /// <summary>Разобранный OpenDota матч — только данные одного игрока (вас).</summary>
 public sealed class MatchDetails
 {
@@ -51,6 +56,11 @@ public sealed class MatchDetails
     public IReadOnlyList<int> TeamXpAdv { get; init; } = Array.Empty<int>();
     public IReadOnlyList<HeroKill> HeroKills { get; init; } = Array.Empty<HeroKill>();
     public IReadOnlyList<MatchObjective> Objectives { get; init; } = Array.Empty<MatchObjective>();
+    /// <summary>0.25.0: все игроки матча (сначала Свет, потом Тьма) и счёт по убийствам.</summary>
+    public IReadOnlyList<MatchPlayer> Players { get; init; } = Array.Empty<MatchPlayer>();
+    public int RadiantScore { get; init; }
+    public int DireScore { get; init; }
+    public bool? RadiantWin { get; init; }
 
     public int? LastHitsAt(int minute) => minute < LastHitsByMinute.Count ? LastHitsByMinute[minute] : null;
     public int? DeniesAt(int minute) => minute < DeniesByMinute.Count ? DeniesByMinute[minute] : null;
@@ -111,6 +121,24 @@ public sealed class MatchDetails
         }
         int sign = radiant ? 1 : -1;
 
+        var table = new List<MatchPlayer>();
+        foreach (var p in players.EnumerateArray())
+        {
+            int ps = Int(p, "player_slot") ?? 0;
+            var items = new List<int>();
+            for (int i = 0; i < 6; i++) items.Add(Int(p, "item_" + i) ?? 0);
+            string? name = Str(p, "personaname");
+            table.Add(new MatchPlayer(
+                Int(p, "hero_id") ?? 0, ps < 128, ps == slot && Long(p, "account_id") == accountId,
+                string.IsNullOrWhiteSpace(name) ? null : name.Trim(),
+                Int(p, "level") ?? 0, Int(p, "kills") ?? 0, Int(p, "deaths") ?? 0, Int(p, "assists") ?? 0,
+                Int(p, "net_worth") ?? Int(p, "total_gold") ?? 0, Int(p, "last_hits") ?? 0, Int(p, "denies") ?? 0,
+                Int(p, "gold_per_min") ?? 0, Int(p, "xp_per_min") ?? 0,
+                Int(p, "hero_damage") ?? 0, Int(p, "tower_damage") ?? 0, Int(p, "hero_healing") ?? 0,
+                items, Int(p, "item_neutral") ?? 0));
+        }
+        int radiantKills = table.Where(x => x.IsRadiant).Sum(x => x.Kills), direKills = table.Where(x => !x.IsRadiant).Sum(x => x.Kills);
+
         return new MatchDetails
         {
             MatchId = Long(root, "match_id") ?? 0,
@@ -135,6 +163,10 @@ public sealed class MatchDetails
             TeamXpAdv = IntArray(root, "radiant_xp_adv").Select(x => x * sign).ToList(),
             HeroKills = heroKills.OrderBy(k => k.Time).ToList(),
             Objectives = ParseObjectives(root, radiant),
+            Players = table.OrderBy(x => x.IsRadiant ? 0 : 1).ToList(),
+            RadiantScore = Int(root, "radiant_score") ?? radiantKills,
+            DireScore = Int(root, "dire_score") ?? direKills,
+            RadiantWin = radiantWin,
         };
     }
 

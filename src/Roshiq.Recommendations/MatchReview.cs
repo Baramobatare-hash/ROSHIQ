@@ -19,6 +19,11 @@ public sealed record ItemTimingRow(string ItemKey, int Yours, int? Norm)
 
 public sealed record KillerRow(int HeroId, int Count);
 
+/// <summary>0.25.0: строка таблицы матча (сохраняется в разборе). Items — ключи item_xxx, пустая строка — пустой слот.</summary>
+public sealed record ScoreRow(int HeroId, bool IsRadiant, bool IsYou, string? Name, int Level, int Kills, int Deaths, int Assists,
+    int NetWorth, int LastHits, int Denies, int Gpm, int Xpm, int HeroDamage, int TowerDamage, int HeroHealing,
+    List<string> Items, string? Neutral);
+
 /// <summary>Разбор одного матча по данным OpenDota (сохраняется локально).</summary>
 public sealed class MatchReview
 {
@@ -42,6 +47,12 @@ public sealed class MatchReview
     public List<int> GoldAdv { get; set; } = new();
     public List<int> XpAdv { get; set; } = new();
     public List<TimelineEvent> Timeline { get; set; } = new();
+    /// <summary>0.25.0: таблица матча — все десять игроков и счёт. Пусто у разборов из старых версий.</summary>
+    public List<ScoreRow> Players { get; set; } = new();
+    public int RadiantScore { get; set; }
+    public int DireScore { get; set; }
+    public bool? RadiantWin { get; set; }
+    public int Duration { get; set; }
 
     [JsonIgnore] public IEnumerable<Insight> Problems => Insights.Where(i => i.Severity < 0).OrderBy(i => i.Severity);
     [JsonIgnore] public IEnumerable<Insight> Good => Insights.Where(i => i.Severity > 0).OrderByDescending(i => i.Severity);
@@ -85,7 +96,8 @@ public static class MatchReviewBuilder
     }
 
     public static MatchReview Build(MatchDetails d, Position? position, IReadOnlyDictionary<string, int?> norms,
-        Func<string, (string Ru, string En)> itemName, Func<int, (string Ru, string En)> heroName, Func<string, int?> cost)
+        Func<string, (string Ru, string En)> itemName, Func<int, (string Ru, string En)> heroName, Func<string, int?> cost,
+        Func<int, string?>? itemKeyById = null)
     {
         var r = new MatchReview
         {
@@ -103,7 +115,15 @@ public static class MatchReviewBuilder
             Sentries = d.Sentries.Count,
             GoldAdv = d.TeamGoldAdv.ToList(),
             XpAdv = d.TeamXpAdv.ToList(),
+            RadiantScore = d.RadiantScore,
+            DireScore = d.DireScore,
+            RadiantWin = d.RadiantWin,
+            Duration = d.Duration,
         };
+        string Key(int id) => id > 0 && itemKeyById?.Invoke(id) is string k ? k : "";
+        r.Players = d.Players.Select(p => new ScoreRow(p.HeroId, p.IsRadiant, p.IsYou, p.Name, p.Level, p.Kills, p.Deaths, p.Assists,
+            p.NetWorth, p.LastHits, p.Denies, p.Gpm, p.Xpm, p.HeroDamage, p.TowerDamage, p.HeroHealing,
+            p.ItemIds.Select(Key).ToList(), Key(p.NeutralId) is { Length: > 0 } n ? n : null)).ToList();
         r.Timeline = MatchTimeline.Build(d, heroName);
         r.Items = KeyPurchases(d, cost).Select(p => new ItemTimingRow(p.ItemKey, p.Time, norms.TryGetValue(p.ItemKey, out var n) ? n : null)).ToList();
         r.Killers = d.DeathsBy.Where(x => x.KillerHeroId > 0).GroupBy(x => x.KillerHeroId)

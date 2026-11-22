@@ -1164,5 +1164,20 @@ internal static class StringsExtra
         ["pn_no_pool"] = ("Патч {0}. Добавьте героев в избранные (☆ в разделе «Сборка»), и здесь появятся их изменения.", "Patch {0}. Add favorite heroes (☆ in Build) to see their changes here."),
         ["pn_untouched"] = ("Патч {0}: ваших героев ({1}) изменения не коснулись.", "Patch {0}: none of your {1} heroes changed."),
         ["pn_info"] = ("Патч {0}: изменены {1} из {2} ваших героев. Текст — из OpenDota, на английском.", "Patch {0}: {1} of your {2} heroes changed. Text from OpenDota."),
+        // ---------- 0.25.0: сводка матча (таблица всех игроков)
+        ["score_radiant"] = ("Свет", "Radiant"),
+        ["score_dire"] = ("Тьма", "Dire"),
+        ["score_victory"] = ("Победа", "Victory"),
+        ["score_defeat"] = ("Поражение", "Defeat"),
+        ["score_you"] = ("Вы", "You"),
+        ["score_anon"] = ("Скрытый профиль", "Private profile"),
+        ["score_col_kda"] = ("У / С / П", "K / D / A"),
+        ["score_col_nw"] = ("Ценность", "Net worth"),
+        ["score_col_lhdn"] = ("Доб. / Ден.", "LH / DN"),
+        ["score_col_gpmxpm"] = ("GPM / XPM", "GPM / XPM"),
+        ["score_col_dmg"] = ("Урон", "Damage"),
+        ["score_col_bld"] = ("Строения", "Buildings"),
+        ["score_col_items"] = ("Предметы", "Items"),
+        ["score_old"] = ("Таблица матча появится после «Обновить разбор» — этот разбор сделан старой версией.", "The match table appears after \"Refresh review\": this review was made by an older version."),
     };
 }

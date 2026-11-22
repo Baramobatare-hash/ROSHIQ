@@ -41,6 +41,12 @@ public partial class HistoryView
             return;
         }
 
+        // 0.25.0: сводка матча — все десять игроков, как на STRATZ
+        if (review.Players.Count >= 2)
+            OdReviewPanel.Children.Add(Scoreboard(review, L));
+        else
+            OdReviewPanel.Children.Add(Ui.Text(L.Get("score_old"), "MutedText", 0));
+
         // главные выводы
         foreach (var ins in review.Top)
             OdReviewPanel.Children.Add(InsightLine(ins, L));

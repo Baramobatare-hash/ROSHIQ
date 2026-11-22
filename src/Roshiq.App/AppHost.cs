@@ -1341,10 +1341,18 @@ public sealed class AppHost : IDisposable
                 }
                 norms[p.ItemKey] = norm;
             }
+            // 0.25.0: id предметов → ключи — для таблицы матча (иконки предметов у всех десяти игроков)
+            if (_itemIdMap == null)
+            {
+                try { _itemIdMap = await client.GetItemIdMapAsync(CancellationToken.None); }
+                catch (Exception ex) { Log.Warn($"Справочник id предметов: {ex.Message}"); }
+            }
+            var idMap = _itemIdMap;
             var review = MatchReviewBuilder.Build(details, position, norms,
                 key => Database.FindItem(key) is { } item ? (item.NameRu, item.Name) : (PrettyItem(key), PrettyItem(key)),
                 hid => Database.FindHero(hid) is { } h ? (h.NameRu, h.Name) : ("?", "?"),
-                Costs.Cost);
+                Costs.Cost,
+                id => idMap != null && idMap.TryGetValue(id, out var k) ? k : null);
             Reviews.Save(review);
             Log.Info($"Разбор матча {matchId}: выводов {review.Insights.Count}, разобран: {review.Parsed}");
             return (review, review.Parsed ? null : Loc.T("review_parsing"));

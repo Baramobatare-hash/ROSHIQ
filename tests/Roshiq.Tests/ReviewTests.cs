@@ -15,6 +15,7 @@ public class ReviewTests
       "players": [
         {
           "account_id": 42, "player_slot": 1, "hero_id": 1, "kills": 5, "deaths": 4, "assists": 6,
+          "level": 22, "net_worth": 18400, "item_0": 145, "item_1": 0, "item_neutral": 300, "personaname": " Me ",
           "lh_t": [0,3,7,11,15,19,23,26,29,32,35,40],
           "dn_t": [0,1,1,2,2,3,3,3,4,4,4,5],
           "benchmarks": {
@@ -50,6 +51,37 @@ public class ReviewTests
     {
         using var doc = JsonDocument.Parse(MatchJson);
         return MatchDetails.Parse(doc.RootElement, 42, id => id == 1 ? "npc_dota_hero_antimage" : null)!;
+    }
+
+    [Fact]
+    public void Parse_ExtractsScoreboard()
+    {
+        var d = Details();
+        Assert.Equal(2, d.Players.Count);
+        var me = d.Players[0];
+        Assert.True(me.IsRadiant);
+        Assert.True(me.IsYou);
+        Assert.Equal("Me", me.Name);
+        Assert.Equal(22, me.Level);
+        Assert.Equal(18400, me.NetWorth);
+        Assert.Equal(145, me.ItemIds[0]);
+        Assert.Equal(6, me.ItemIds.Count);
+        Assert.False(d.Players[1].IsYou);
+        Assert.Null(d.Players[1].Name);
+        Assert.Equal(5, d.RadiantScore);   // счёта в ответе нет — сумма убийств команды
+        Assert.Equal(0, d.DireScore);
+        Assert.False(d.RadiantWin);
+
+        var r = MatchReviewBuilder.Build(d, Position.Carry, new Dictionary<string, int?>(), k => (k, k), _ => ("?", "?"), _ => 3000,
+            id => id == 145 ? "item_bfury" : id == 300 ? "item_mysterious_hat" : null);
+        Assert.Equal("item_bfury", r.Players[0].Items[0]);
+        Assert.Equal("", r.Players[0].Items[1]);
+        Assert.Equal("item_mysterious_hat", r.Players[0].Neutral);
+        Assert.Equal(2400, r.Duration);
+        var json = System.Text.Json.JsonSerializer.Serialize(r);
+        var back = System.Text.Json.JsonSerializer.Deserialize<MatchReview>(json)!;
+        Assert.Equal("item_bfury", back.Players[0].Items[0]);
+        Assert.Equal(5, back.RadiantScore);
     }
 
     [Fact]
