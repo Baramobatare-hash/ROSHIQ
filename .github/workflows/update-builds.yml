@@ -7,10 +7,16 @@ on:
   schedule:
     - cron: '17 3 * * 1'        # понедельник, 06:17 по Москве
   workflow_dispatch:
+    inputs:
+      meta_args:
+        description: 'Аргументы tools/update_meta.py (например --probe)'
+        required: false
+        default: ''
   push:
     branches: [main]
     paths:
       - tools/update_builds.py
+      - tools/update_meta.py
       - .github/workflows/update-builds.yml
 
 permissions:
@@ -33,6 +39,12 @@ jobs:
 
       - name: Сборки из OpenDota
         run: python tools/update_builds.py
+
+      # Мета и сборки по позициям из STRATZ (бесплатный токен в секрете STRATZ_TOKEN); без токена шаг ничего не меняет
+      - name: Мета и сборки из STRATZ
+        env:
+          STRATZ_TOKEN: ${{ secrets.STRATZ_TOKEN }}
+        run: python tools/update_meta.py ${{ github.event.inputs.meta_args }}
 
       - name: Изменились ли данные
         id: diff
@@ -58,7 +70,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/Roshiq.Data/Resources/hero_builds.txt src/Roshiq.Data/Resources/data_version.txt
-          git commit -m "Данные: сборки героев по OpenDota ($(Get-Date -Format 'dd.MM.yyyy'))"
+          git add src/Roshiq.Data/Resources
+          git commit -m "Данные: мета и сборки героев ($(Get-Date -Format 'dd.MM.yyyy'))"
           git pull --rebase origin main
           git push origin HEAD:main
