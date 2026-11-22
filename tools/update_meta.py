@@ -237,13 +237,21 @@ def fetch_meta(token):
 
 
 def fetch_items(token, hero_id, pos):
-    """Покупки и сапоги одним запросом (лимит STRATZ — 2000 запросов в час)."""
+    """Покупки (itemFullPurchase) и отдельно сапоги: в одном запросе с сапогами STRATZ отдаёт пустые покупки."""
     br = ",".join(BUILD_BRACKETS)
-    q = ("query{ heroStats{ full: itemFullPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s], matchLimit:0){ itemId instance time matchCount winCount }"
-         " boots: itemBootPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s]){ itemId matchCount winCount } } }"
-         % (hero_id, pos, br, hero_id, pos, br))
-    d = gql(token, q)["heroStats"]
-    return d.get("full") or [], [], d.get("boots") or []
+    q = ("query{ heroStats{ itemFullPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s], matchLimit:0){ itemId instance time matchCount winCount } } }"
+         % (hero_id, pos, br))
+    full = gql(token, q)["heroStats"]["itemFullPurchase"] or []
+    boots = []
+    if BOOTS_OK[0]:
+        try:
+            qb = ("query{ heroStats{ itemBootPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s]){ itemId matchCount winCount } } }"
+                  % (hero_id, pos, br))
+            boots = gql(token, qb)["heroStats"]["itemBootPurchase"] or []
+        except Exception as e:
+            print(f"  сапоги STRATZ недоступны: {str(e)[:200]}")
+            BOOTS_OK[0] = False
+    return full, [], boots
 
 
 BOOTS_OK = [True]
