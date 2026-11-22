@@ -237,14 +237,26 @@ def fetch_meta(token):
 
 def fetch_items(token, hero_id, pos):
     br = ",".join(BUILD_BRACKETS)
-    q = ("query{ heroStats{ full: itemFullPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s]){ itemId instance time matchCount winCount }"
+    q = ("query{ heroStats{ full: itemFullPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s], matchLimit:0){ itemId instance time matchCount winCount }"
          " start: itemStartingPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s]){ itemId instance wasGiven matchCount winCount } } }"
          % (hero_id, pos, br, hero_id, pos, br))
     d = gql(token, q)["heroStats"]
-    return d.get("full") or [], d.get("start") or []
+    boots = []
+    if BOOTS_OK[0]:
+        try:
+            qb = ("query{ heroStats{ itemBootPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s]){ itemId matchCount winCount } } }"
+                  % (hero_id, pos, br))
+            boots = gql(token, qb)["heroStats"]["itemBootPurchase"] or []
+        except Exception as e:
+            print(f"  сапоги STRATZ недоступны: {str(e)[:200]}")
+            BOOTS_OK[0] = False
+    return d.get("full") or [], d.get("start") or [], boots
 
 
-def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts):
+BOOTS_OK = [True]
+
+
+def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts, boots_rows=()):
     """Сборка {phase: [keys]} по покупкам: популярные (метовые) предметы с лучшим процентом побед среди равных по времени."""
     agg = {}
     for r in full:
@@ -279,7 +291,7 @@ def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts):
     pool = {k: v for k, v in items.items()
             if v["share"] >= CORE_SHARE and k not in CONSUMABLES and k not in dropped
             and not (known[k]["catalog"] and not consts.get(k, {}).get("created"))}
-    pool = {k: v for k, v in pool.items() if consts.get(k, {}).get("cost", 1) and not consts.get(k, {}).get("tier")}  # нейтралки не покупают
+    pool = {k: v for k, v in pool.items() if (consts.get(k, {}).get("cost") is None or consts[k]["cost"] > 0) and not consts.get(k, {}).get("tier")}  # нейтралки не покупают
 
     # «лучше равных по времени»: процент побед предмета против среднего у популярных предметов той же стадии
     by_phase = {}
@@ -288,6 +300,18 @@ def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts):
     result = {}
     boots = [k for k in pool if known[k]["group"] == "boots"]
     main_boots = max(boots, key=lambda k: pool[k]["n"]) if boots else None
+    # сапоги STRATZ отдаёт отдельно (itemBootPurchase): самая частая пара — в раннюю игру
+    b_agg = {}
+    for r in boots_rows or []:
+        key = by_id.get(int(r.get("itemId") or 0))
+        if key and key in known and known[key]["group"] == "boots":
+            b_agg[key] = b_agg.get(key, 0) + int(r.get("matchCount") or 0)
+    if len(b_agg) > 1:
+        b_agg.pop("item_boots", None)                    # Boots of Speed — лишь ступень к настоящим сапогам
+    if b_agg and main_boots is None:
+        main_boots = max(b_agg, key=b_agg.get)
+        pool[main_boots] = {"n": b_agg[main_boots], "share": 1.0, "wr": hero_wr, "t": 6.0}
+        by_phase.setdefault("early", []).append(main_boots)
     for phase in ("early", "mid", "late"):
         keys = [k for k in by_phase.get(phase, []) if known[k]["group"] != "boots" or k == main_boots]
         if not keys:
@@ -314,8 +338,9 @@ def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts):
         for k, v in items.items():
             if v["t"] <= 0.5:
                 s_agg[k] = v["n"]
+    s_sample = max(list(s_agg.values()) + [1])           # тот же приём: самый частый стартовый предмет — почти в каждой игре
     starts = [k for k, n in sorted(s_agg.items(), key=lambda kv: -kv[1])
-              if n / hero_matches >= START_SHARE and consts.get(k, {}).get("cost", 0) <= 600
+              if n / s_sample >= START_SHARE and (consts.get(k, {}).get("cost") or 0) <= 600
               and not (pos <= 3 and k in SUPPORT_ONLY)]
     if starts:
         result["start"] = starts[:SIZES["start"]]
@@ -374,13 +399,17 @@ def full(token):
         if h not in heroes or m < MIN_BUILD_MATCHES or m < MIN_POS_SHARE * hero_total[h]:
             continue
         try:
-            fullrows, startrows = fetch_items(token, h, p)
+            fullrows, startrows, bootrows = fetch_items(token, h, p)
         except Exception as e:
             print(f"  {heroes[h]} поз. {p}: ошибка {str(e)[:200]}")
             continue
         calls += 1
         time.sleep(0.35)                                  # лимит STRATZ — до 250 запросов в минуту
-        b = make_build(p, fullrows, startrows, m, w / m, by_id, known, consts)
+        try:
+            b = make_build(p, fullrows, startrows, m, w / m, by_id, known, consts, bootrows)
+        except Exception as e:
+            print(f"  {heroes[h]} поз.{p}: сборка не получилась: {e!r}")
+            continue
         if calls <= 3:
             print(f"  {heroes[h]} поз.{p}: строк покупок {len(fullrows)}, стартовых {len(startrows)}, сборка {b}")
         if "mid" in b or "late" in b:
