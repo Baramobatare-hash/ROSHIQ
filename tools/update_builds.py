@@ -264,4 +264,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except RuntimeError as e:
+        # OpenDota недоступен: старые сборки остаются, шаг STRATZ и проверки идут дальше
+        print(f"OpenDota недоступен — сборки OpenDota не обновлены: {e}")

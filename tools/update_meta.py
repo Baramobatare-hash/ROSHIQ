@@ -148,8 +148,35 @@ def read_rows(name, min_fields):
     return rows
 
 
+def stratz_items(token):
+    """Запасной справочник предметов из STRATZ (если OpenDota недоступен): id → item_xxx, цена, компоненты."""
+    for fields in ("id shortName stat{ cost } components{ componentId }", "id shortName stat{ cost }", "id shortName"):
+        try:
+            rows = gql(token, "query{ constants{ items{ %s } } }" % fields)["constants"]["items"] or []
+            break
+        except Exception as e:
+            print(f"  справочник STRATZ ({fields}): {str(e)[:200]}")
+            rows = []
+    by_id, consts = {}, {}
+    for r in rows:
+        if r.get("id") is None or not r.get("shortName"):
+            continue
+        key = "item_" + r["shortName"]
+        by_id[int(r["id"])] = key
+        consts[key] = {"id": int(r["id"]), "cost": int(((r.get("stat") or {}).get("cost")) or 0) or None}
+    for r in rows:
+        comps = [c.get("componentId") for c in (r.get("components") or []) if c.get("componentId") is not None]
+        key = by_id.get(int(r["id"])) if r.get("id") is not None else None
+        if key and comps:
+            consts[key]["components"] = [by_id[c][5:] for c in comps if c in by_id]
+            consts[key]["created"] = True
+    print(f"  справочник предметов из STRATZ: {len(by_id)}")
+    return consts, by_id
+
+
 def opendota_items():
     req = urllib.request.Request("https://api.opendota.com/api/constants/items", headers={"User-Agent": "ROSHIQ-data-update"})
+    last = None
     for attempt in range(5):
         try:
             with urllib.request.urlopen(req, timeout=60) as r:
@@ -300,7 +327,14 @@ def full(token):
     known = {}
     for r in read_rows("items.txt", 6):
         known[r[0]] = {"catalog": r[4] == "catalog", "group": r[4], "phase": r[3]}
-    consts, by_id = opendota_items()
+    try:
+        consts, by_id = opendota_items()
+    except Exception as e:
+        print(f"OpenDota недоступен ({str(e)[:150]}) — справочник предметов берём из STRATZ")
+        consts, by_id = stratz_items(token)
+    if len(by_id) < 150:
+        print("справочник предметов слишком мал — файлы не меняю")
+        return
 
     meta = fetch_meta(token)
     if len({h for (h, _, _) in meta}) < 100:
