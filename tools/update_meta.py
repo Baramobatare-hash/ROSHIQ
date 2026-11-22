@@ -256,11 +256,15 @@ def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts):
         n, w, t = int(r.get("matchCount") or 0), int(r.get("winCount") or 0), float(r.get("time") or 0)
         a = agg.setdefault(key, [0, 0, 0.0])
         a[0] += n; a[1] += w; a[2] += t * n
+    # покупки STRATZ считает по своей выборке матчей, а не по всем матчам героя: число игр в выборке оцениваем по самому
+    # частому предмету (сапоги, Magic Wand и т. п. есть почти в каждой игре)
+    sample = max([a[0] for a in agg.values()] + [1])
     items = {}
     for k, (n, w, tn) in agg.items():
         if n <= 0:
             continue
-        items[k] = {"n": n, "share": n / hero_matches, "wr": (w + PRIOR * hero_wr) / (n + PRIOR), "t": tn / n}
+        items[k] = {"n": n, "share": n / sample, "wr": (w + PRIOR * hero_wr) / (n + PRIOR), "t": tn / n}
+    hero_matches = sample
 
     # компоненты не показываем, если собранный из них предмет покупают хотя бы в трети случаев
     dropped = set()
@@ -354,6 +358,7 @@ def full(token):
     with open(os.path.join(RES, "hero_meta.txt"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(header + lines) + "\n")
     print(f"hero_meta.txt: {len(lines)} строк")
+    bump_version(day)
 
     # сборки по позициям: только сильные ранги
     strong = {}
@@ -376,6 +381,8 @@ def full(token):
         calls += 1
         time.sleep(0.35)                                  # лимит STRATZ — до 250 запросов в минуту
         b = make_build(p, fullrows, startrows, m, w / m, by_id, known, consts)
+        if calls <= 3:
+            print(f"  {heroes[h]} поз.{p}: строк покупок {len(fullrows)}, стартовых {len(startrows)}, сборка {b}")
         if "mid" in b or "late" in b:
             built[(heroes[h], p)] = b
     print(f"сборки STRATZ: {len(built)} (герой, позиция), запросов: {calls}")
@@ -410,6 +417,11 @@ def full(token):
         if (hk, p) in built:
             print(f"  пример {hk} {p}: " + " | ".join(f"{ph}: {','.join(v)}" for ph, v in built[(hk, p)].items()))
 
+    bump_version(day)
+
+
+def bump_version(day):
+    """Новая dataVersion: установленные программы заберут обновлённые файлы с GitHub (и git увидит изменение)."""
     vp = os.path.join(RES, "data_version.txt")
     v = open(vp, encoding="utf-8-sig").read().replace("\r\n", "\n").split("\n")
     stamp = day.replace("-", ".")
