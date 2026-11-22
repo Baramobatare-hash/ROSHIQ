@@ -25,10 +25,15 @@ RES = os.path.join(ROOT, "src", "Roshiq.Data", "Resources")
 POSITIONS = ["POSITION_1", "POSITION_2", "POSITION_3", "POSITION_4", "POSITION_5"]
 
 
+ip_waits = [0]
+
+
 def gql(token, query, variables=None, retries=5):
     body = json.dumps({"query": query, "variables": variables or {}}).encode()
     last = None
-    for attempt in range(retries):
+    attempt = 0
+    while attempt < retries:
+        attempt += 1
         req = urllib.request.Request(ENDPOINT, data=body, method="POST", headers={
             "Authorization": "Bearer " + token, "Content-Type": "application/json",
             "User-Agent": "STRATZ_API", "Accept": "application/json"})
@@ -39,7 +44,15 @@ def gql(token, query, variables=None, retries=5):
                 raise RuntimeError(json.dumps(d["errors"], ensure_ascii=False)[:800])
             return d.get("data") or {}
         except urllib.error.HTTPError as e:
-            last = f"HTTP {e.code}: {e.read()[:300]!r}"
+            text = e.read()[:400].decode("utf-8", "replace")
+            last = f"HTTP {e.code}: {text}"
+            if e.code == 403 and "IP Address" in text and ip_waits[0] < 20:
+                # бесплатный ключ: не больше двух IP за 15 минут; адрес раннера GitHub — новый, ждём, пока освободится место
+                ip_waits[0] += 1
+                print(f"  STRATZ: лимит IP-адресов, жду минуту ({ip_waits[0]}/20)")
+                time.sleep(60)
+                attempt -= 1               # ожидание IP не считается попыткой
+                continue
             if e.code in (401, 403):
                 raise RuntimeError("STRATZ отклонил токен: " + last)
             time.sleep(10 if e.code == 429 else 3 * (attempt + 1))
