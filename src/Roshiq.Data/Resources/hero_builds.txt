@@ -3,7 +3,7 @@
 # Файл создаётся автоматически: tools/update_builds.py, раз в неделю (.github/workflows/update-builds.yml).
 # Источник — открытые данные OpenDota (api.opendota.com, heroes/{id}/itemPopularity): самые частые покупки
 # на герое по стадиям игры в профессиональных матчах. Это популярность, а не процент побед.
-# Обновлено 2026-11-21. Героев со сборкой: 127.
+# Обновлено 2026-11-22. Героев со сборкой: 127.
 antimage|1|start|item_branches,item_circlet,item_tango,item_faerie_fire
 antimage|1|early|item_power_treads,item_wraith_band
 antimage|1|mid|item_bfury,item_manta
@@ -11,7 +11,7 @@ antimage|1|late|item_skadi,item_black_king_bar,item_butterfly
 axe|3|start|item_gauntlets,item_branches,item_tango,item_ring_of_protection
 axe|3|early|item_phase_boots,item_bracer
 axe|3|mid|item_blink,item_blade_mail,item_aghanims_shard
-axe|3|late|item_black_king_bar,item_heart,item_lotus_orb
+axe|3|late|item_black_king_bar,item_lotus_orb,item_heart
 bane|5|start|item_ward_observer,item_branches,item_ward_dispenser,item_tango
 bane|5|early|item_boots
 bane|5|mid|item_aether_lens,item_ghost
@@ -76,13 +76,13 @@ nevermore|1|start|item_faerie_fire,item_branches,item_tango,item_circlet
 nevermore|1|early|item_power_treads,item_falcon_blade
 nevermore|1|mid|item_manta,item_mask_of_madness,item_hurricane_pike
 nevermore|1|late|item_greater_crit,item_satanic,item_black_king_bar
-phantom_lancer|1|start|item_branches,item_circlet,item_quelling_blade,item_tango
+phantom_lancer|1|start|item_branches,item_circlet,item_tango,item_quelling_blade
 phantom_lancer|1|early|item_power_treads,item_wraith_band
 phantom_lancer|1|mid|item_manta,item_ultimate_scepter
 phantom_lancer|1|late|item_skadi,item_bloodthorn,item_heart
 puck|2|start|item_branches,item_tango,item_faerie_fire
 puck|2|early|item_power_treads,item_null_talisman,item_wraith_band
-puck|2|mid|item_blink,item_aghanims_shard
+puck|2|mid|item_blink,item_aghanims_shard,item_cyclone
 puck|2|late|item_devastator,item_octarine_core,item_sphere
 pudge|4|start|item_branches,item_gauntlets,item_tango,item_circlet
 pudge|4|early|item_bracer,item_phase_boots
@@ -107,7 +107,7 @@ razor|2|late|item_blink,item_sphere,item_nullifier
 sand_king|3|start|item_branches,item_tango
 sand_king|3|early|item_phase_boots
 sand_king|3|mid|item_blink,item_ultimate_scepter
-sand_king|3|late|item_black_king_bar,item_shivas_guard,item_basher
+sand_king|3|late|item_black_king_bar,item_shivas_guard,item_soul_booster
 sand_king|4|start|item_branches,item_tango,item_ward_observer
 sand_king|4|early|item_phase_boots
 sand_king|4|mid|item_blink,item_ultimate_scepter
@@ -205,8 +205,8 @@ witch_doctor|5|mid|item_arcane_boots,item_aghanims_shard,item_ghost
 witch_doctor|5|late|item_force_staff,item_glimmer_cape,item_solar_crest
 lich|5|start|item_ward_observer,item_branches,item_tango,item_blood_grenade
 lich|5|early|item_tranquil_boots
-lich|5|mid|item_aghanims_shard,item_glimmer_cape
-lich|5|late|item_ultimate_scepter,item_force_staff,item_solar_crest
+lich|5|mid|item_aghanims_shard,item_glimmer_cape,item_force_staff
+lich|5|late|item_ultimate_scepter,item_solar_crest
 riki|4|start|item_branches,item_tango,item_circlet,item_quelling_blade
 riki|4|early|item_power_treads,item_wraith_band,item_orb_of_corrosion
 riki|4|mid|item_aghanims_shard
@@ -225,7 +225,7 @@ enigma|5|mid|item_blink,item_aghanims_shard,item_black_king_bar
 enigma|5|late|item_ultimate_scepter,item_boots_of_bearing
 enigma|4|start|item_branches,item_tango,item_faerie_fire,item_ring_of_regen
 enigma|4|early|item_ancient_janggo,item_helm_of_the_dominator
-enigma|4|mid|item_blink,item_aghanims_shard,item_spirit_vessel
+enigma|4|mid|item_blink,item_aghanims_shard
 enigma|4|late|item_ultimate_scepter,item_boots_of_bearing
 tinker|2|start|item_branches,item_tango,item_faerie_fire
 tinker|2|mid|item_blink,item_ultimate_scepter,item_kaya_and_sange
@@ -263,7 +263,7 @@ beastmaster|3|late|item_black_king_bar,item_assault,item_refresher
 queenofpain|2|start|item_branches,item_tango,item_faerie_fire
 queenofpain|2|early|item_power_treads,item_null_talisman,item_soul_ring
 queenofpain|2|mid|item_ultimate_scepter,item_kaya_and_sange,item_aghanims_shard
-queenofpain|2|late|item_black_king_bar,item_shivas_guard,item_octarine_core
+queenofpain|2|late|item_black_king_bar,item_shivas_guard,item_bloodstone
 venomancer|3|start|item_branches,item_tango,item_faerie_fire,item_magic_stick
 venomancer|3|mid|item_arcane_boots,item_spirit_vessel
 venomancer|3|late|item_ultimate_scepter,item_blink,item_guardian_greaves
@@ -344,11 +344,11 @@ dragon_knight|3|late|item_ultimate_scepter,item_octarine_core,item_overwhelming_
 dazzle|5|start|item_ward_observer,item_branches,item_tango,item_blood_grenade
 dazzle|5|early|item_boots
 dazzle|5|mid|item_holy_locket
-dazzle|5|late|item_glimmer_cape,item_force_staff,item_solar_crest
+dazzle|5|late|item_force_staff,item_glimmer_cape,item_solar_crest
 dazzle|4|start|item_branches,item_tango,item_blood_grenade,item_ward_dispenser
 dazzle|4|early|item_boots
 dazzle|4|mid|item_holy_locket
-dazzle|4|late|item_blink,item_glimmer_cape,item_force_staff
+dazzle|4|late|item_blink,item_force_staff,item_glimmer_cape
 rattletrap|4|start|item_branches,item_tango,item_ward_dispenser,item_blood_grenade
 rattletrap|4|early|item_tranquil_boots,item_urn_of_shadows
 rattletrap|4|mid|item_aghanims_shard
@@ -409,12 +409,12 @@ omniknight|3|start|item_branches,item_gauntlets,item_tango,item_faerie_fire
 omniknight|3|early|item_phase_boots,item_bracer,item_soul_ring
 omniknight|3|mid|item_harpoon,item_blink,item_radiance
 omniknight|3|late|item_black_king_bar,item_ultimate_scepter,item_octarine_core
-enchantress|5|start|item_ward_observer,item_branches,item_tango,item_faerie_fire
+enchantress|5|start|item_ward_observer,item_branches,item_tango,item_blood_grenade
 enchantress|5|mid|item_ancient_janggo,item_power_treads,item_solar_crest
 enchantress|5|late|item_hurricane_pike,item_ultimate_scepter,item_black_king_bar
-enchantress|4|start|item_branches,item_tango,item_faerie_fire,item_blood_grenade
+enchantress|4|start|item_branches,item_tango,item_blood_grenade,item_ward_dispenser
 enchantress|4|mid|item_ancient_janggo,item_solar_crest
-enchantress|4|late|item_ultimate_scepter,item_blink,item_pipe
+enchantress|4|late|item_ultimate_scepter,item_blink
 huskar|2|start|item_gauntlets,item_branches,item_faerie_fire,item_magic_stick
 huskar|2|early|item_armlet,item_power_treads
 huskar|2|mid|item_black_king_bar,item_blink,item_hurricane_pike
@@ -464,7 +464,7 @@ jakiro|4|late|item_ultimate_scepter,item_force_staff,item_aether_lens
 batrider|3|start|item_branches,item_faerie_fire,item_tango,item_circlet
 batrider|3|early|item_null_talisman,item_bracer
 batrider|3|mid|item_blink,item_boots_of_bearing
-batrider|3|late|item_ultimate_scepter,item_black_king_bar,item_shivas_guard
+batrider|3|late|item_black_king_bar,item_ultimate_scepter,item_shivas_guard
 batrider|4|start|item_branches,item_faerie_fire,item_tango,item_circlet
 batrider|4|early|item_null_talisman,item_bracer
 batrider|4|mid|item_blink,item_boots_of_bearing
@@ -472,7 +472,7 @@ batrider|4|late|item_ultimate_scepter,item_force_staff,item_aether_lens
 batrider|2|start|item_branches,item_faerie_fire,item_tango,item_circlet
 batrider|2|early|item_null_talisman,item_bracer
 batrider|2|mid|item_blink,item_boots_of_bearing
-batrider|2|late|item_ultimate_scepter,item_black_king_bar,item_aether_lens
+batrider|2|late|item_black_king_bar,item_ultimate_scepter,item_aether_lens
 chen|5|start|item_ward_observer,item_branches,item_tango,item_blood_grenade
 chen|5|mid|item_ancient_janggo,item_guardian_greaves
 chen|5|late|item_ultimate_scepter,item_solar_crest,item_glimmer_cape
@@ -490,11 +490,11 @@ doom_bringer|3|start|item_gauntlets,item_branches,item_tango,item_circlet
 doom_bringer|3|early|item_phase_boots,item_bracer,item_soul_ring
 doom_bringer|3|mid|item_blink,item_aghanims_shard,item_ancient_janggo
 doom_bringer|3|late|item_shivas_guard,item_ultimate_scepter,item_overwhelming_blink
-ursa|1|start|item_branches,item_tango,item_faerie_fire,item_quelling_blade
+ursa|1|start|item_branches,item_tango,item_quelling_blade,item_faerie_fire
 ursa|1|early|item_phase_boots
 ursa|1|mid|item_bfury,item_black_king_bar
 ursa|1|late|item_abyssal_blade,item_sange,item_monkey_king_bar
-ursa|3|start|item_branches,item_tango,item_faerie_fire,item_quelling_blade
+ursa|3|start|item_branches,item_tango,item_quelling_blade,item_faerie_fire
 ursa|3|early|item_phase_boots
 ursa|3|mid|item_bfury,item_black_king_bar
 ursa|3|late|item_abyssal_blade,item_sange,item_swift_blink
@@ -558,10 +558,10 @@ brewmaster|3|mid|item_ultimate_scepter,item_blink,item_spirit_vessel
 brewmaster|3|late|item_assault,item_refresher,item_black_king_bar
 shadow_demon|5|start|item_ward_observer,item_branches,item_tango,item_blood_grenade
 shadow_demon|5|mid|item_arcane_boots,item_aghanims_shard,item_glimmer_cape
-shadow_demon|5|late|item_aether_lens,item_ultimate_scepter,item_guardian_greaves
+shadow_demon|5|late|item_aether_lens,item_ultimate_scepter
 shadow_demon|4|start|item_branches,item_tango,item_blood_grenade,item_faerie_fire
 shadow_demon|4|mid|item_arcane_boots,item_blink,item_aghanims_shard
-shadow_demon|4|late|item_aether_lens,item_ultimate_scepter,item_guardian_greaves
+shadow_demon|4|late|item_aether_lens,item_ultimate_scepter
 lone_druid|1|start|item_branches,item_faerie_fire,item_blight_stone
 lone_druid|1|early|item_power_treads
 lone_druid|1|mid|item_mjollnir,item_ultimate_scepter,item_aghanims_shard
@@ -576,7 +576,7 @@ chaos_knight|1|mid|item_armlet,item_aghanims_shard
 chaos_knight|1|late|item_heart,item_bloodthorn,item_black_king_bar
 chaos_knight|3|start|item_branches,item_gauntlets,item_tango,item_quelling_blade
 chaos_knight|3|early|item_power_treads,item_bracer
-chaos_knight|3|mid|item_armlet,item_blink,item_echo_sabre
+chaos_knight|3|mid|item_armlet,item_blink,item_aghanims_shard
 chaos_knight|3|late|item_heart,item_black_king_bar,item_harpoon
 meepo|2|start|item_branches,item_circlet,item_slippers,item_tango
 meepo|2|early|item_wraith_band,item_power_treads
@@ -604,17 +604,17 @@ ogre_magi|4|mid|item_arcane_boots,item_blink,item_ultimate_scepter
 ogre_magi|4|late|item_glimmer_cape,item_sheepstick,item_force_staff
 undying|5|start|item_ward_observer,item_branches,item_enchanted_mango,item_tango
 undying|5|early|item_soul_ring,item_phase_boots
-undying|5|mid|item_aghanims_shard,item_octarine_core
+undying|5|mid|item_aghanims_shard,item_blink,item_octarine_core
 undying|5|late|item_ultimate_scepter,item_force_staff,item_glimmer_cape
-undying|4|start|item_branches,item_enchanted_mango,item_tango,item_blood_grenade
+undying|4|start|item_branches,item_enchanted_mango,item_tango,item_gauntlets
 undying|4|early|item_soul_ring,item_phase_boots
-undying|4|mid|item_aghanims_shard,item_octarine_core
-undying|4|late|item_blink,item_ultimate_scepter,item_force_staff
-rubick|4|start|item_branches,item_tango,item_blood_grenade,item_ward_dispenser
+undying|4|mid|item_aghanims_shard,item_blink
+undying|4|late|item_ultimate_scepter,item_force_staff,item_lotus_orb
+rubick|4|start|item_branches,item_tango,item_ward_dispenser,item_blood_grenade
 rubick|4|early|item_boots,item_urn_of_shadows
 rubick|4|mid|item_aghanims_shard,item_glimmer_cape
 rubick|4|late|item_blink,item_ultimate_scepter,item_aether_lens
-rubick|5|start|item_ward_observer,item_branches,item_tango,item_blood_grenade
+rubick|5|start|item_ward_observer,item_branches,item_tango,item_ward_dispenser
 rubick|5|early|item_boots,item_urn_of_shadows
 rubick|5|mid|item_aghanims_shard,item_glimmer_cape
 rubick|5|late|item_ultimate_scepter,item_aether_lens,item_force_staff
@@ -670,7 +670,7 @@ visage|4|mid|item_vladmir,item_aghanims_shard,item_boots_of_bearing
 visage|4|late|item_ultimate_scepter,item_sheepstick,item_pipe
 slark|1|start|item_branches,item_circlet,item_faerie_fire,item_tango
 slark|1|early|item_power_treads,item_bracer,item_wraith_band
-slark|1|mid|item_ultimate_scepter,item_blink
+slark|1|mid|item_ultimate_scepter
 slark|1|late|item_black_king_bar,item_disperser,item_skadi
 medusa|1|start|item_branches,item_magic_stick,item_circlet,item_enchanted_mango
 medusa|1|early|item_power_treads,item_null_talisman
@@ -735,15 +735,15 @@ skywrath_mage|2|late|item_blink,item_sheepstick,item_invis_sword
 abaddon|3|start|item_branches,item_tango,item_magic_stick,item_circlet
 abaddon|3|early|item_phase_boots,item_null_talisman
 abaddon|3|mid|item_radiance,item_blink,item_harpoon
-abaddon|3|late|item_sange,item_ultimate_scepter,item_abyssal_blade
+abaddon|3|late|item_ultimate_scepter,item_sange,item_abyssal_blade
 abaddon|5|start|item_ward_observer,item_branches,item_tango,item_magic_stick
 abaddon|5|early|item_phase_boots,item_null_talisman
-abaddon|5|mid|item_harpoon,item_holy_locket
-abaddon|5|late|item_sange,item_ultimate_scepter,item_guardian_greaves
+abaddon|5|mid|item_holy_locket,item_harpoon
+abaddon|5|late|item_ultimate_scepter,item_sange,item_guardian_greaves
 abaddon|1|start|item_branches,item_tango,item_magic_stick,item_circlet
 abaddon|1|early|item_phase_boots,item_null_talisman
 abaddon|1|mid|item_radiance,item_manta,item_harpoon
-abaddon|1|late|item_bloodthorn,item_sange,item_ultimate_scepter
+abaddon|1|late|item_bloodthorn,item_ultimate_scepter,item_sange
 elder_titan|4|start|item_branches,item_tango,item_blood_grenade,item_ward_dispenser
 elder_titan|4|early|item_tranquil_boots,item_bracer
 elder_titan|4|mid|item_ultimate_scepter,item_aghanims_shard,item_glimmer_cape
@@ -760,10 +760,10 @@ legion_commander|1|start|item_branches,item_gauntlets,item_tango,item_quelling_b
 legion_commander|1|early|item_bracer,item_phase_boots
 legion_commander|1|mid|item_blink,item_blade_mail
 legion_commander|1|late|item_black_king_bar,item_ultimate_scepter,item_assault
-techies|4|start|item_branches,item_faerie_fire,item_tango,item_ward_dispenser
+techies|4|start|item_branches,item_tango,item_faerie_fire,item_ward_dispenser
 techies|4|mid|item_arcane_boots,item_solar_crest
 techies|4|late|item_force_staff,item_sheepstick,item_aether_lens
-techies|5|start|item_ward_observer,item_branches,item_faerie_fire,item_tango
+techies|5|start|item_ward_observer,item_branches,item_tango,item_faerie_fire
 techies|5|mid|item_arcane_boots,item_solar_crest
 techies|5|late|item_force_staff,item_sheepstick,item_aether_lens
 ember_spirit|2|start|item_branches,item_tango,item_faerie_fire
@@ -823,11 +823,11 @@ monkey_king|4|mid|item_black_king_bar,item_desolator
 monkey_king|4|late|item_harpoon,item_sange,item_disperser
 dark_willow|4|start|item_branches,item_tango,item_ward_dispenser,item_blood_grenade
 dark_willow|4|early|item_tranquil_boots
-dark_willow|4|mid|item_aghanims_shard
+dark_willow|4|mid|item_aghanims_shard,item_spirit_vessel
 dark_willow|4|late|item_blink,item_cyclone,item_force_staff
 dark_willow|5|start|item_ward_observer,item_branches,item_tango,item_ward_dispenser
 dark_willow|5|early|item_tranquil_boots
-dark_willow|5|mid|item_aghanims_shard
+dark_willow|5|mid|item_aghanims_shard,item_spirit_vessel
 dark_willow|5|late|item_cyclone,item_force_staff,item_sheepstick
 pangolier|3|start|item_branches,item_tango
 pangolier|3|early|item_power_treads,item_bracer,item_falcon_blade
@@ -843,7 +843,7 @@ grimstroke|5|late|item_ultimate_scepter,item_sheepstick,item_aether_lens
 grimstroke|4|start|item_branches,item_tango,item_blood_grenade,item_faerie_fire
 grimstroke|4|mid|item_arcane_boots,item_aghanims_shard,item_glimmer_cape
 grimstroke|4|late|item_blink,item_ultimate_scepter,item_sheepstick
-hoodwink|4|start|item_branches,item_tango,item_ward_dispenser,item_faerie_fire
+hoodwink|4|start|item_branches,item_ward_dispenser,item_tango,item_blood_grenade
 hoodwink|4|early|item_boots,item_urn_of_shadows
 hoodwink|4|mid|item_aghanims_shard,item_glimmer_cape,item_spirit_vessel
 hoodwink|4|late|item_blink,item_force_staff,item_cyclone
@@ -871,8 +871,8 @@ ringmaster|4|mid|item_arcane_boots,item_cyclone,item_glimmer_cape
 ringmaster|4|late|item_blink,item_ultimate_scepter,item_force_staff
 dawnbreaker|3|start|item_gauntlets,item_branches,item_tango,item_circlet
 dawnbreaker|3|early|item_soul_ring,item_phase_boots,item_bracer
-dawnbreaker|3|mid|item_aghanims_shard,item_harpoon,item_black_king_bar
-dawnbreaker|3|late|item_assault,item_sange,item_abyssal_blade
+dawnbreaker|3|mid|item_aghanims_shard,item_harpoon
+dawnbreaker|3|late|item_black_king_bar,item_assault,item_sange
 dawnbreaker|5|start|item_ward_observer,item_gauntlets,item_branches,item_tango
 dawnbreaker|5|early|item_soul_ring,item_phase_boots,item_bracer
 dawnbreaker|5|mid|item_aghanims_shard,item_harpoon
@@ -924,8 +924,8 @@ largo|3|late|item_black_king_bar,item_ultimate_scepter,item_shivas_guard
 largo|4|start|item_gauntlets,item_branches,item_tango,item_magic_stick
 largo|4|early|item_phase_boots,item_soul_ring,item_bracer
 largo|4|mid|item_aghanims_shard,item_meteor_hammer,item_lotus_orb
-largo|4|late|item_ultimate_scepter,item_aether_lens,item_solar_crest
+largo|4|late|item_black_king_bar,item_ultimate_scepter,item_sphere
 largo|5|start|item_ward_observer,item_gauntlets,item_branches,item_tango
 largo|5|early|item_phase_boots,item_soul_ring,item_bracer
 largo|5|mid|item_aghanims_shard,item_meteor_hammer
-largo|5|late|item_ultimate_scepter,item_aether_lens,item_solar_crest
+largo|5|late|item_black_king_bar,item_ultimate_scepter,item_sphere
