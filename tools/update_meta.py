@@ -133,6 +133,7 @@ CONSUMABLES = {
     "item_famango", "item_great_famango", "item_greater_famango", "item_infused_raindrop", "item_aghanims_shard_roshan",
     "item_ultimate_scepter_roshan", "item_royal_jelly",
 }
+NOT_SLOT = {"item_aghanims_shard", "item_aghanims_shard_roshan", "item_moon_shard"}   # не занимают слот
 SUPPORT_ONLY = {"item_ward_observer", "item_ward_sentry", "item_ward_dispenser", "item_smoke_of_deceit", "item_dust", "item_blood_grenade"}
 
 
@@ -236,21 +237,13 @@ def fetch_meta(token):
 
 
 def fetch_items(token, hero_id, pos):
+    """Покупки и сапоги одним запросом (лимит STRATZ — 2000 запросов в час)."""
     br = ",".join(BUILD_BRACKETS)
     q = ("query{ heroStats{ full: itemFullPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s], matchLimit:0){ itemId instance time matchCount winCount }"
-         " start: itemStartingPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s]){ itemId instance wasGiven matchCount winCount } } }"
+         " boots: itemBootPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s]){ itemId matchCount winCount } } }"
          % (hero_id, pos, br, hero_id, pos, br))
     d = gql(token, q)["heroStats"]
-    boots = []
-    if BOOTS_OK[0]:
-        try:
-            qb = ("query{ heroStats{ itemBootPurchase(heroId:%d, positionIds:[POSITION_%d], bracketBasicIds:[%s]){ itemId matchCount winCount } } }"
-                  % (hero_id, pos, br))
-            boots = gql(token, qb)["heroStats"]["itemBootPurchase"] or []
-        except Exception as e:
-            print(f"  сапоги STRATZ недоступны: {str(e)[:200]}")
-            BOOTS_OK[0] = False
-    return d.get("full") or [], d.get("start") or [], boots
+    return d.get("full") or [], [], d.get("boots") or []
 
 
 BOOTS_OK = [True]
@@ -290,7 +283,7 @@ def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts, bo
 
     pool = {k: v for k, v in items.items()
             if v["share"] >= CORE_SHARE and k not in CONSUMABLES and k not in dropped
-            and not (known[k]["catalog"] and not consts.get(k, {}).get("created"))}
+            and not (known[k]["catalog"] and not consts.get(k, {}).get("created")) and k not in NOT_SLOT}
     pool = {k: v for k, v in pool.items() if (consts.get(k, {}).get("cost") is None or consts[k]["cost"] > 0) and not consts.get(k, {}).get("tier")}  # нейтралки не покупают
 
     # «лучше равных по времени»: процент побед предмета против среднего у популярных предметов той же стадии
@@ -304,6 +297,8 @@ def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts, bo
         key = by_id.get(int(r.get("itemId") or 0))
         if key and key in known and known[key]["group"] == "boots":
             b_agg[key] = max(b_agg.get(key, 0), int(r.get("matchCount") or 0))
+    if not b_agg:                                        # сапоги есть почти у всех — берём самые частые, даже если редкие в выборке
+        b_agg = {k: v["n"] for k, v in items.items() if known[k]["group"] == "boots"}
     if len(b_agg) > 1:
         b_agg.pop("item_boots", None)
     main_boots = max(b_agg, key=b_agg.get) if b_agg else None
@@ -337,7 +332,7 @@ def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts, bo
     # стартовая закупка: что реально куплено до начала игры (минута ≤ 0) — по тем же данным, что и остальные стадии
     s_agg = {}
     for r in full:
-        if float(r.get("time") or 0) > 0 or int(r.get("instance") or 0) != 0:
+        if float(r.get("time") or 0) > 1 or int(r.get("instance") or 0) != 0:
             continue
         key = by_id.get(int(r["itemId"]))
         if key and key in known:
@@ -368,6 +363,65 @@ def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts, bo
             result[phase] = [k for k in result[phase] if k not in starts]
             if not result[phase]:
                 del result[phase]
+    return tidy(result, items, known, consts, main_boots, starts, cost, floor, phase_of)
+
+
+ALTERNATIVES = [{"item_bfury", "item_desolator"}, {"item_orchid", "item_mage_slayer"}, {"item_radiance", "item_bfury"}]
+
+
+def tidy(result, items, known, consts, main_boots, starts, cost, floor, phase_of):
+    """Чистка сборки: без компонентов рядом с апгрейдом, без взаимоисключающих пар, 2–3 предмета в каждой стадии."""
+    def picked():
+        return [k for ph in ("early", "mid", "late") for k in result.get(ph, [])]
+    def comps_of_picks():
+        out = set()
+        for k in picked():
+            out |= all_components(k, consts)
+        return out
+    def drop_components():
+        comps = comps_of_picks()
+        for ph in ("early", "mid", "late"):
+            if ph in result:
+                result[ph] = [k for k in result[ph] if k not in comps or (k == main_boots and not any(
+                    known.get(b, {}).get("group") == "boots" and b != k for b in picked()))]
+    drop_components()
+    for ph in ("early", "mid", "late"):             # из пары альтернатив оставляем более частую
+        lst = result.get(ph, [])
+        for alt in ALTERNATIVES:
+            both = [k for k in picked() if k in alt]
+            if len(both) > 1:
+                loser = min(both, key=lambda k: items.get(k, {}).get("n", 0))
+                for p2 in result:
+                    if p2 != "start":
+                        result[p2] = [k for k in result[p2] if k != loser]
+    # добор: в каждой стадии минимум 2 предмета — самые частые покупки этой стадии (от 5% игр)
+    used = set(picked()) | set(starts)
+    blocked = comps_of_picks()
+    for ph in ("early", "mid", "late"):
+        lst = result.get(ph, [])
+        if len(lst) >= 2:
+            continue
+        cands = sorted((k for k, v in items.items()
+                        if phase_of(v["t"]) == ph and v["share"] >= 0.05 and k not in used and k not in blocked
+                        and k not in CONSUMABLES and k not in NOT_SLOT and known[k]["group"] != "boots"
+                        and not consts.get(k, {}).get("tier")
+                        and not (known[k]["catalog"] and not consts.get(k, {}).get("created"))
+                        and (not cost(k) or cost(k) >= floor[ph])),
+                       key=lambda k: -items[k]["n"])
+        for k in cands:
+            if len(lst) >= 2:
+                break
+            if any(k in alt and any(o in alt for o in used if o != k) for alt in ALTERNATIVES):
+                continue
+            lst.append(k); used.add(k); blocked |= all_components(k, consts)
+        if lst:
+            result[ph] = sorted(lst, key=lambda k: items.get(k, {}).get("t", 0))
+    drop_components()
+    if main_boots and main_boots not in picked() and not any(known.get(k, {}).get("group") == "boots" for k in picked()):
+        result.setdefault("early", []).insert(0, main_boots)
+    for ph in list(result):
+        if not result[ph]:
+            del result[ph]
     return result
 
 

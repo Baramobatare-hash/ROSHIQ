@@ -54,6 +54,8 @@ public sealed class GameDatabase
     public IReadOnlyList<GapRule> GapRules { get; private set; } = Array.Empty<GapRule>();
     public IReadOnlyList<RoleTip> RoleTips { get; private set; } = Array.Empty<RoleTip>();
     public IReadOnlyList<TimerRule> Timers { get; private set; } = Array.Empty<TimerRule>();
+    /// <summary>0.25: мета по позициям (hero_meta.txt, STRATZ): матчи и победы героя на позиции в группе рангов.</summary>
+    public IReadOnlyList<HeroMetaRow> Meta { get; private set; } = Array.Empty<HeroMetaRow>();
     /// <summary>Советы на линию по признакам соперника (lane_tips.txt), в порядке важности.</summary>
     public IReadOnlyList<LaneTip> LaneTips { get; private set; } = Array.Empty<LaneTip>();
     public IReadOnlyDictionary<string, string> VersionInfo { get; private set; } = new Dictionary<string, string>();
@@ -241,6 +243,16 @@ public sealed class GameDatabase
             _curated[(f[0].ToLowerInvariant(), p, phase)] = list.Where(_items.ContainsKey).ToArray();
         }
 
+        var meta = new List<HeroMetaRow>();
+        foreach (var f in src.Rows("hero_meta.txt", 5))
+        {
+            if (!_byKey.ContainsKey(f[0]) || !TryParsePosition(f[1], out var mp) || !int.TryParse(f[3], out var mm) || !int.TryParse(f[4], out var mw)
+                || mm <= 0 || mw < 0 || mw > mm || f[2] is not ("ALL" or "HG" or "CA" or "LA" or "DI"))
+            { warnings.Add($"hero_meta.txt: неверная строка для {f[0]}"); continue; }
+            meta.Add(new HeroMetaRow(_byKey[f[0]].Key, mp, f[2], mm, mw));
+        }
+        Meta = meta;
+
         var timers = new List<TimerRule>();
         foreach (var f in src.Rows("timers.txt", 7))
         {
@@ -375,3 +387,6 @@ public sealed class GameDatabase
         }
     }
 }
+
+/// <summary>0.25: строка hero_meta.txt — герой на позиции в группе рангов STRATZ (HG, CA, LA, DI или ALL).</summary>
+public sealed record HeroMetaRow(string HeroKey, Position Position, string Bracket, int Matches, int Wins);

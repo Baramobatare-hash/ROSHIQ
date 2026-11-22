@@ -84,15 +84,20 @@ public partial class TierListView : UserControl, IRefreshable
     {
         var L = Loc.Instance;
         TiersPanel.Children.Clear();
+        // 0.25: по позициям — из меты STRATZ (приходит с данными, сеть для неё не нужна); про-сцена и запасной вариант — OpenDota
+        var byRole = TierList.BuildFromMeta(App.Host.Database.Meta, App.Host.Database.Heroes, _position, _bracket);
+        NoteText.Text = L.Get(byRole != null ? "tier_note_role" : "tier_note");
         var stats = App.Host.TierStats.Get();
-        if (stats == null)
+        if (byRole == null && stats == null)
         {
             CounterCard.Visibility = Visibility.Collapsed;
             if (!_loading) StatusText.Text = App.Host.Settings.Current.Data.AllowOnlineStats ? L.Get("tier_none") : L.Get("tier_need_network");
             return;
         }
-        var entries = TierList.Build(stats, App.Host.Database.Heroes, _position, _bracket);
-        StatusText.Text = L.Format("tier_status", entries.Count, stats.FetchedUtc.ToLocalTime().ToString("dd.MM HH:mm", CultureInfo.InvariantCulture));
+        var entries = byRole ?? TierList.Build(stats!, App.Host.Database.Heroes, _position, _bracket);
+        StatusText.Text = byRole != null
+            ? L.Format("tier_status_role", entries.Count, App.Host.Database.DataVersion)
+            : L.Format("tier_status", entries.Count, stats!.FetchedUtc.ToLocalTime().ToString("dd.MM HH:mm", CultureInfo.InvariantCulture));
         if (entries.Count == 0) { TiersPanel.Children.Add(Ui.Text(L.Get("tier_empty"), "MutedText")); CounterCard.Visibility = Visibility.Collapsed; return; }
 
         _selected ??= entries[0].Hero;

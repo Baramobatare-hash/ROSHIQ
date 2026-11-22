@@ -21,7 +21,7 @@
             </Border>
 
             <StackPanel x:Name="TiersPanel" />
-            <TextBlock Text="{app:T tier_note}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" />
+            <TextBlock x:Name="NoteText" Text="{app:T tier_note}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" />
         </StackPanel>
     </ScrollViewer>
 </UserControl>

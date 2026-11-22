@@ -75,6 +75,47 @@ public static class TierList
         return MarkPopular(list).OrderByDescending(e => e.WinRate).ToList();
     }
 
+    /// <summary>0.25: группы рангов STRATZ (hero_meta.txt), из которых складывается выбранная группа ROSHIQ. Про-сцены в мете нет.</summary>
+    public static IReadOnlyList<string>? MetaBrackets(RankBracket b) => b switch
+    {
+        RankBracket.All => new[] { "ALL" },
+        RankBracket.Low => new[] { "HG", "CA" },
+        RankBracket.Mid => new[] { "CA", "LA" },
+        RankBracket.High => new[] { "LA", "DI" },
+        RankBracket.Immortal => new[] { "DI" },
+        _ => null
+    };
+
+    /// <summary>На позиции герой должен быть хотя бы в 1% матчей (с обеих сторон), иначе данных мало.</summary>
+    public const double MinRolePickRate = 0.01;
+    public const int MinRoleGames = 150;
+
+    /// <summary>
+    /// 0.25: тир-лист по настоящей позиции — матчи и победы героя именно на этой позиции (STRATZ, рейтинговые паблики последней недели).
+    /// Герой попадает в позицию по данным, а не по нашей базе: если его реально играют на этой роли, он в списке. null — данных нет.
+    /// </summary>
+    public static List<TierEntry>? BuildFromMeta(IReadOnlyList<HeroMetaRow> meta, IEnumerable<Hero> heroes, Position position, RankBracket bracket)
+    {
+        var groups = MetaBrackets(bracket);
+        if (groups == null || meta.Count == 0) return null;
+        var rows = meta.Where(r => r.Position == position && groups.Contains(r.Bracket)).ToList();
+        if (rows.Count == 0) return null;
+        // в каждом матче на позиции по одному герою с каждой стороны
+        double matches = rows.Sum(r => (double)r.Matches) / 2;
+        var byHero = heroes.ToDictionary(h => h.Key, StringComparer.OrdinalIgnoreCase);
+        var list = new List<TierEntry>();
+        foreach (var g in rows.GroupBy(r => r.HeroKey, StringComparer.OrdinalIgnoreCase))
+        {
+            if (!byHero.TryGetValue(g.Key, out var hero)) continue;
+            int games = g.Sum(r => r.Matches), wins = g.Sum(r => r.Wins);
+            double pick = games / matches;
+            if (games < MinRoleGames || pick < MinRolePickRate) continue;
+            double wr = (wins + Prior * 0.5) / (games + Prior);
+            list.Add(new TierEntry(hero, TierFor(wr), wr, pick, games));
+        }
+        return MarkPopular(list).OrderByDescending(e => e.WinRate).ToList();
+    }
+
     /// <summary>Минимальная доля побед, чтобы популярного героя назвать «в мете»: часто берут, но стабильно проигрывают — это не мета.</summary>
     public const double PopularMinWinRate = 0.495;
 

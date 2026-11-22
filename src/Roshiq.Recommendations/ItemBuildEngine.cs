@@ -92,7 +92,7 @@ public sealed class ItemBuildEngine
                     var (s, rs) = Score(item, hero, position);
                     var reasons = new List<Reason>(rs)
                     {
-                        new(ReasonKind.Item, 0, "часто покупают на этом герое (OpenDota)", "often bought on this hero (OpenDota)")
+                        new(ReasonKind.Item, 0, "популярный выбор на этой позиции в рейтинговых играх недели", "a popular pick in this role in this week's ranked games")
                     };
                     picks.Add(new ItemPick(item, s, reasons, true));
                     Mark(item, used, usedGroups);
