@@ -12,6 +12,7 @@
 Только стандартная библиотека Python.
 """
 import argparse
+import subprocess
 import json
 import os
 import sys
@@ -434,6 +435,23 @@ def tidy(result, items, known, consts, main_boots, starts, cost, floor, phase_of
     return result
 
 
+def keep_previous_stratz_builds():
+    """STRATZ не дал сборок, а update_builds.py уже переписал файл сборками OpenDota (популярность у про).
+    Если в репозитории лежат сборки STRATZ — возвращаем их: старые, но по позициям, лучше, чем общая популярность."""
+    rel = "src/Roshiq.Data/Resources/hero_builds.txt"
+    try:
+        prev = subprocess.run(["git", "show", "HEAD:" + rel], capture_output=True, check=True).stdout.decode("utf-8-sig")
+    except Exception as e:
+        print(f"  прежний hero_builds.txt не прочитать: {e}")
+        return
+    if "STRATZ" not in "\n".join(prev.splitlines()[:12]):
+        print("  в репозитории сборки не из STRATZ — оставляю OpenDota")
+        return
+    with open(os.path.join(RES, "hero_builds.txt"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(prev)
+    print("  вернул прежние сборки STRATZ из репозитория")
+
+
 def full(token):
     heroes = {int(r[0]): r[1] for r in read_rows("heroes.txt", 6)}
     known = {}
@@ -454,11 +472,13 @@ def full(token):
         consts = s_consts
     if len(by_id) < 150:
         print("справочник предметов слишком мал — файлы не меняю")
+        keep_previous_stratz_builds()
         return
 
     meta = fetch_meta(token)
     if len({h for (h, _, _) in meta}) < 100:
         print(f"STRATZ вернул мету только для {len({h for (h, _, _) in meta})} героев — файлы не меняю")
+        keep_previous_stratz_builds()
         return
     total_all = sum(m for (h, p, b), (m, w) in meta.items() if b == "ALL")
     print(f"мета: {len(meta)} строк, матчей-героев (все ранги): {total_all}")
@@ -511,7 +531,8 @@ def full(token):
             built[(heroes[h], p)] = b
     print(f"сборки STRATZ: {len(built)} (герой, позиция), запросов: {calls}")
     if len(built) < 150:
-        print("слишком мало сборок — hero_builds.txt не меняю")
+        print("слишком мало сборок — новые сборки STRATZ не записываю")
+        keep_previous_stratz_builds()
         return
     # проверка здравого смысла: почти у каждого героя есть сапоги и Magic Wand / сапоги в ранней игре.
     # Если нет — данные перепутаны (например, id предметов не совпали), файл не трогаем.
@@ -521,7 +542,8 @@ def full(token):
     ok = sum(1 for b in built.values() if sane(b))
     print(f"проверка: сапоги есть в {ok} из {len(built)} сборок")
     if ok < 0.85 * len(built):
-        print("сборки не прошли проверку здравого смысла — hero_builds.txt не меняю")
+        print("сборки не прошли проверку здравого смысла — новые сборки STRATZ не записываю")
+        keep_previous_stratz_builds()
         return
 
     # hero_builds.txt: сборки STRATZ заменяют строки для своих (герой, позиция); остальное — из прежнего файла (OpenDota)
