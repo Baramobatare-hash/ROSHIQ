@@ -298,22 +298,30 @@ def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts, bo
     for k, v in pool.items():
         by_phase.setdefault(phase_of(v["t"]), []).append(k)
     result = {}
-    boots = [k for k in pool if known[k]["group"] == "boots"]
-    main_boots = max(boots, key=lambda k: pool[k]["n"]) if boots else None
-    # сапоги STRATZ отдаёт отдельно (itemBootPurchase): самая частая пара — в раннюю игру
-    b_agg = {}
+    # сапоги: одна пара — самая частая «настоящая» (Boots of Speed — лишь ступень к ним). STRATZ отдаёт их и отдельно (itemBootPurchase)
+    b_agg = {k: pool[k]["n"] for k in pool if known[k]["group"] == "boots"}
     for r in boots_rows or []:
         key = by_id.get(int(r.get("itemId") or 0))
         if key and key in known and known[key]["group"] == "boots":
-            b_agg[key] = b_agg.get(key, 0) + int(r.get("matchCount") or 0)
+            b_agg[key] = max(b_agg.get(key, 0), int(r.get("matchCount") or 0))
     if len(b_agg) > 1:
-        b_agg.pop("item_boots", None)                    # Boots of Speed — лишь ступень к настоящим сапогам
-    if b_agg and main_boots is None:
-        main_boots = max(b_agg, key=b_agg.get)
-        pool[main_boots] = {"n": b_agg[main_boots], "share": 1.0, "wr": hero_wr, "t": 6.0}
-        by_phase.setdefault("early", []).append(main_boots)
+        b_agg.pop("item_boots", None)
+    main_boots = max(b_agg, key=b_agg.get) if b_agg else None
+    for k in [k for k in pool if known[k]["group"] == "boots" and k != main_boots]:
+        del pool[k]
+    if main_boots:
+        pool[main_boots] = {"n": b_agg[main_boots], "share": 1.0, "wr": pool.get(main_boots, {}).get("wr", hero_wr),
+                            "t": min(pool.get(main_boots, {}).get("t", 6.0), EARLY_END - 1)}
+    by_phase = {}
+    for k, v in pool.items():
+        by_phase.setdefault(phase_of(v["t"]), []).append(k)
+    result = {}
+    def cost(k):
+        return consts.get(k, {}).get("cost") or 0
+    floor = {"early": 0, "mid": 1000, "late": 2500}     # в средней и поздней игре — только серьёзные предметы
     for phase in ("early", "mid", "late"):
-        keys = [k for k in by_phase.get(phase, []) if known[k]["group"] != "boots" or k == main_boots]
+        keys = [k for k in by_phase.get(phase, []) if (known[k]["group"] != "boots" or k == main_boots)
+                and (k == main_boots or not cost(k) or cost(k) >= floor[phase])]
         if not keys:
             continue
         mean = sum(pool[k]["wr"] * pool[k]["n"] for k in keys) / sum(pool[k]["n"] for k in keys)
@@ -326,9 +334,15 @@ def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts, bo
             picks = picks[:size - 1] + [main_boots]          # сапоги в ранней игре — всегда
         result[phase] = sorted(picks, key=lambda k: pool[k]["t"])
 
-    # стартовая закупка
+    # стартовая закупка: что реально куплено до начала игры (минута ≤ 0) — по тем же данным, что и остальные стадии
     s_agg = {}
-    for r in start:
+    for r in full:
+        if float(r.get("time") or 0) > 0 or int(r.get("instance") or 0) != 0:
+            continue
+        key = by_id.get(int(r["itemId"]))
+        if key and key in known:
+            s_agg[key] = s_agg.get(key, 0) + int(r.get("matchCount") or 0)
+    for r in ([] if s_agg else start):
         if r.get("wasGiven"):
             continue
         key = by_id.get(int(r["itemId"]))
@@ -341,9 +355,18 @@ def make_build(pos, full, start, hero_matches, hero_wr, by_id, known, consts, bo
     s_sample = max(list(s_agg.values()) + [1])           # тот же приём: самый частый стартовый предмет — почти в каждой игре
     starts = [k for k, n in sorted(s_agg.items(), key=lambda kv: -kv[1])
               if n / s_sample >= START_SHARE and (consts.get(k, {}).get("cost") or 0) <= 600
-              and not (pos <= 3 and k in SUPPORT_ONLY)]
+              and not (pos <= 3 and k in SUPPORT_ONLY) and known[k]["group"] != "boots"]   # сапоги — одна пара, в ранней игре
+    if pos == 5 and "item_ward_observer" in known and "item_ward_observer" not in starts:
+        starts = ["item_ward_observer"] + starts                 # пятёрка всегда начинает с обсервера
+    starts = starts[:SIZES["start"]]
     if starts:
-        result["start"] = starts[:SIZES["start"]]
+        result["start"] = starts
+    # один предмет — в одной стадии: купленное на старте не повторяем в ранней игре
+    for phase in ("early", "mid", "late"):
+        if phase in result:
+            result[phase] = [k for k in result[phase] if k not in starts]
+            if not result[phase]:
+                del result[phase]
     return result
 
 
