@@ -162,9 +162,30 @@ def all_components(key, consts, seen=None):
 
 def fetch_meta(token):
     """{(hero, pos, bracket): (matches, wins)} — bracket: HG/CA/LA/DI/ALL; pos 1..5."""
-    q = ("query{ heroStats{ stats(groupByPosition:true, groupByBracket:true, groupByTime:false, bracketBasicIds:[%s]){"
-         " heroId position bracketBasicIds matchCount winCount } } }" % ",".join(BRACKETS))
-    rows = gql(token, q)["heroStats"]["stats"] or []
+    fields = "heroId position bracketBasicIds matchCount winCount"
+    rows = []
+    # по одной группе рангов за запрос: так bracketBasicIds в ответе может быть пустым — подставляем сами
+    for br in BRACKETS:
+        variants = [
+            "query{ heroStats{ stats(groupByPosition:true, groupByBracket:true, bracketBasicIds:[%s]){ %s } } }" % (br, fields),
+            "query{ heroStats{ stats(heroIds:[%s], groupByPosition:true, bracketBasicIds:[%s]){ %s } } }"
+            % (",".join(str(i) for i in range(1, 160)), br, fields),
+        ]
+        got = []
+        for q in variants:
+            try:
+                got = gql(token, q)["heroStats"]["stats"] or []
+            except Exception as e:
+                print(f"  stats {br}: ошибка {str(e)[:300]}")
+                got = []
+            print(f"  stats {br}: строк {len(got)}; пример: {json.dumps(got[:2], ensure_ascii=False)[:300]}")
+            if len({r.get('heroId') for r in got}) >= 100:
+                break
+        for r in got:
+            if not r.get("bracketBasicIds"):
+                r["bracketBasicIds"] = br
+        rows += got
+        time.sleep(0.5)
     meta = {}
     for r in rows:
         pos = r.get("position") or ""
