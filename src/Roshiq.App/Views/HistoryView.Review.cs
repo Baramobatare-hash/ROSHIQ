@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Roshiq.Core.Diagnostics;
 using Roshiq.Core.Localization;
 using Roshiq.Core.Models;
 using Roshiq.Overlay;
@@ -52,6 +53,9 @@ public partial class HistoryView
             OdReviewPanel.Children.Add(InsightLine(ins, L));
         if (review.Insights.Count == 0)
             OdReviewPanel.Children.Add(Ui.Text(L.Get(review.Parsed ? "review_no_insights" : "review_not_parsed"), "MutedText"));
+
+        // 0.26.0: ИИ объясняет ошибки словами (модель в облаке, на компьютер ничего не ставится)
+        OdReviewPanel.Children.Add(AiCard(review, L));
 
         // сравнение с игроками на герое
         if (review.Benchmarks.Count > 0)
@@ -273,6 +277,90 @@ public partial class HistoryView
             }
         };
         var panel = new StackPanel();
+        panel.Children.Add(button);
+        panel.Children.Add(status);
+        return panel;
+    }
+
+    private static AiExplainClient? _ai;
+
+    /// <summary>0.26.0: «Где была ошибка — объяснение ИИ»: кнопка, ответ нейросети и пометка, что она может ошибаться.</summary>
+    private FrameworkElement AiCard(MatchReview review, Loc L)
+    {
+        var panel = new StackPanel();
+        var title = new StackPanel { Orientation = Orientation.Horizontal };
+        title.Children.Add(SubTitle(L.Get("ai_title")));
+        title.Children.Add(new HelpTip { Text = L.Get("ai_help"), Margin = new Thickness(6, 8, 0, 0) });
+        panel.Children.Add(title);
+        var body = new StackPanel();
+        panel.Children.Add(body);
+
+        void ShowText(string text)
+        {
+            body.Children.Clear();
+            foreach (var raw in text.Split('\n'))
+            {
+                var line = raw.Trim().Replace("**", "");
+                if (line.Length == 0) continue;
+                bool bullet = line.StartsWith("- ") || line.StartsWith("• ") || line.StartsWith("* ");
+                if (bullet) line = "•  " + line[2..].Trim();
+                else line = line.TrimStart('#', ' ');
+                var tb = Ui.Text(line, "Value", 3);
+                tb.FontWeight = FontWeights.Normal;
+                tb.Foreground = Ui.Res("Text");
+                if (bullet) tb.Margin = new Thickness(8, 3, 0, 0);
+                body.Children.Add(tb);
+            }
+            body.Children.Add(Ui.Text(L.Get("ai_note"), "MutedText", 8));
+        }
+
+        if (!string.IsNullOrWhiteSpace(review.AiText) && review.AiLang == L.Language)
+        {
+            ShowText(review.AiText!);
+            return panel;
+        }
+        body.Children.Add(Ui.Text(L.Get("ai_intro"), "MutedText"));
+        var status = new TextBlock { Style = (Style)FindResource("MutedText"), Margin = new Thickness(0, 4, 0, 0), TextWrapping = TextWrapping.Wrap };
+        var button = new Button
+        {
+            Content = L.Get("ai_run").ToUpperInvariant(), Style = (Style)FindResource("GhostButton"),
+            HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0)
+        };
+        button.Click += async (_, _) =>
+        {
+            if (!App.Host.Settings.Current.Data.AllowOnlineStats)
+            {
+                status.Text = L.Get("ai_need_network");
+                return;
+            }
+            button.IsEnabled = false;
+            status.Text = L.Get("ai_wait");
+            try
+            {
+                _ai ??= new AiExplainClient(Services.AppUpdater.CurrentVersion.ToString(3));
+                var facts = MatchAiFacts.Build(review,
+                    id => App.Host.Database.FindHero(id)?.Name ?? "?",
+                    key => App.Host.Database.FindItem(key)?.Name ?? key);
+                var (text, error) = await _ai.ExplainAsync(review, facts, L.Language);
+                if (text != null)
+                {
+                    review.AiText = text;
+                    review.AiLang = L.Language;
+                    ShowText(text);
+                    button.Visibility = Visibility.Collapsed;
+                    status.Text = "";
+                    App.Host.Reviews.Save(review);
+                    return;
+                }
+                status.Text = error ?? "";
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("ИИ-объяснение: " + ex.Message);
+                status.Text = L.Get("ai_err");
+            }
+            button.IsEnabled = true;
+        };
         panel.Children.Add(button);
         panel.Children.Add(status);
         return panel;

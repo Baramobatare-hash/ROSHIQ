@@ -1179,5 +1179,17 @@ internal static class StringsExtra
         ["score_col_bld"] = ("Строения", "Buildings"),
         ["score_col_items"] = ("Предметы", "Items"),
         ["score_old"] = ("Таблица матча появится после «Обновить разбор» — этот разбор сделан старой версией.", "The match table appears after \"Refresh review\": this review was made by an older version."),
+        // ---------- 0.26.0: ИИ-объяснение матча
+        ["ai_title"] = ("Где была ошибка — объяснение ИИ", "What went wrong: AI explanation"),
+        ["ai_help"] = ("Нейросеть получает цифры этого разбора (без ника и Steam ID) и объясняет их простыми словами. Модель работает на сервере ROSHIQ в облаке Cloudflare — на компьютер ничего не устанавливается. Нужен интернет.",
+            "A neural network gets the numbers from this review (no nickname or Steam ID) and explains them in plain words. The model runs on the ROSHIQ server in Cloudflare's cloud: nothing is installed on your PC. Needs internet."),
+        ["ai_intro"] = ("Нейросеть посмотрит на цифры матча и объяснит, что пошло не так и что попробовать в следующей игре.",
+            "The AI looks at the match numbers and explains what went wrong and what to try next game."),
+        ["ai_run"] = ("Объяснить ошибки", "Explain mistakes"),
+        ["ai_wait"] = ("Нейросеть разбирает матч, обычно 5–30 секунд…", "The AI is reviewing the match, usually 5–30 seconds…"),
+        ["ai_note"] = ("Объяснение пишет нейросеть по цифрам разбора. Она может ошибаться — сверяйся с графиком и эпизодами ниже.",
+            "Written by an AI from the review numbers. It can be wrong: check it against the chart and episodes below."),
+        ["ai_need_network"] = ("Объяснению нужен интернет, а загрузка из сети в ROSHIQ выключена. Включи «Разрешить загрузку с OpenDota» в «Настройки → Обновления» — этот же переключатель разрешает и ИИ.", "The explanation needs internet, and downloads are turned off in ROSHIQ. Turn on \"Allow downloading from OpenDota\" in Settings → Updates: the same switch allows the AI."),
+        ["ai_err"] = ("Не получилось получить объяснение. Попробуй ещё раз.", "Couldn't get an explanation. Try again."),
     };
 }

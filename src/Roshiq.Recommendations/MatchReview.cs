@@ -53,6 +53,9 @@ public sealed class MatchReview
     public int DireScore { get; set; }
     public bool? RadiantWin { get; set; }
     public int Duration { get; set; }
+    /// <summary>0.26.0: объяснение ИИ (сохраняется, чтобы не спрашивать нейросеть второй раз) и язык, на котором оно написано.</summary>
+    public string? AiText { get; set; }
+    public Language? AiLang { get; set; }
 
     [JsonIgnore] public IEnumerable<Insight> Problems => Insights.Where(i => i.Severity < 0).OrderBy(i => i.Severity);
     [JsonIgnore] public IEnumerable<Insight> Good => Insights.Where(i => i.Severity > 0).OrderByDescending(i => i.Severity);
