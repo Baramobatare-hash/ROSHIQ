@@ -10,8 +10,10 @@ const MODELS = [
   '@cf/google/gemma-3-12b-it',
   '@cf/meta/llama-3.1-8b-instruct-fast',
 ];
-const MAX_BODY = 12000;
+const MAX_BODY = 60000;
 const OD = 'https://api.opendota.com/api';
+// справочники героев и предметов — из открытого репозитория dotaconstants (из него их собирает и OpenDota)
+const DC = 'https://raw.githubusercontent.com/odota/dotaconstants/master/build';
 
 const SYSTEM = `Ты — тренер по Dota 2, который разбирает один матч одного игрока. Пиши по-русски, обращайся на «ты».
 
@@ -153,7 +155,12 @@ async function odGet(path, ttl) {
 let CONST = null;
 async function constants() {
   if (CONST) return CONST;
-  const [h, it, ids] = await Promise.all([odGet('/constants/heroes', 86400), odGet('/constants/items', 86400), odGet('/constants/item_ids', 86400)]);
+  const get = async name => {
+    const r = await fetch(`${DC}/${name}.json`, { cf: { cacheTtl: 86400, cacheEverything: true } });
+    if (!r.ok) throw new Error('dotaconstants ' + r.status);
+    return r.json();
+  };
+  const [h, it, ids] = await Promise.all([get('heroes'), get('items'), get('item_ids')]);
   const heroes = {};
   for (const k in h) heroes[h[k].id] = { name: h[k].localized_name, npc: h[k].name };
   const items = {};
@@ -162,13 +169,20 @@ async function constants() {
   return CONST;
 }
 // полный матч из OpenDota и игрок: по имени героя из фактов (надёжно), иначе по слоту
+// Матч: урезанная копия от программы или сайта (body.od — они качают его из OpenDota со своего адреса),
+// иначе пробуем OpenDota сами (с общих адресов Cloudflare часто отвечает 429).
 async function matchFacts(body, facts) {
-  const id = String(body.match || '');
-  if (!/^\d{6,12}$/.test(id)) return null;
-  const [C, m] = await Promise.all([constants(), odGet('/matches/' + id, 3600)]);
-  if (!m || !Array.isArray(m.players)) return null;
+  const C = await constants();
+  let m = body.od && Array.isArray(body.od.players) && body.od.players.length <= 10 ? body.od : null;
+  if (!m) {
+    const id = String(body.match || '');
+    if (!/^\d{6,12}$/.test(id)) return null;
+    m = await odGet('/matches/' + id, 3600);
+    if (!m || !Array.isArray(m.players)) return null;
+  }
+  let me = Number.isInteger(body.slot) && body.od ? m.players.find(p => p.player_slot === body.slot) : null;
   const want = String(facts.hero || '').toLowerCase();
-  let me = m.players.find(p => (C.heroes[p.hero_id]?.name || '').toLowerCase() === want);
+  if (!me) me = m.players.find(p => (C.heroes[p.hero_id]?.name || '').toLowerCase() === want);
   if (!me && Number.isInteger(body.slot)) me = m.players.find(p => p.player_slot === body.slot);
   if (!me) return null;
   return serverFacts(m, me, C);
