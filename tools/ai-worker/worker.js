@@ -3,7 +3,7 @@
 // из OpenDota (линия, соперники, время мёртвым, участие в драках, предметы) и просит нейросеть Cloudflare Workers AI
 // объяснить ошибки. Ключей нет: модель вызывается через привязку AI (env.AI).
 
-const PROMPT_VERSION = 'v2';
+const PROMPT_VERSION = 'v3';
 const ALLOWED_ORIGINS = ['https://baramobatare-hash.github.io'];
 const MODELS = [
   '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
@@ -23,7 +23,8 @@ const SYSTEM = `Ты — тренер по Dota 2, который разбира
 
 КАК ДУМАТЬ
 1. Сначала пойми роль: likely_role и место по ценности. Саппорта не ругай за мало добиваний и низкую ценность; его оценивают по смертям, участию в драках, вардам, контролю.
-2. Найди 2–3 ошибки, которые сильнее всего повлияли на итог. Порядок важности обычно такой: смерти без размена и время мёртвым → проигранная линия → медленный фарм и поздние ключевые предметы → низкое участие в драках → предметы, не подходящие против врагов.
+2. Ошибки уже найдены: match_facts.diagnosis (отсортированы по важности) и пункты «минус:» в client_facts.analyzer_findings, плюс смерти «без размена» из client_facts. Возьми 2–3 самых важных из них. НЕ добавляй ошибок, которых там нет. Если diagnosis пуст и минусов нет — скажи, что явных ошибок в цифрах не видно, и дай одну задачу на рост.
+   Плюсы бери из match_facts.good и пунктов «плюс:».
 3. Каждую ошибку свяжи с последствием: «умер без размена на 12:40 → потерял ~1 минуту фарма и линия осталась без защиты».
 4. Ориентиры (средние ранги, не абсолют): добивания к 10:00 — керри 45–60, мид 40–55, оффлейн 25–40, саппорт 0–15. Время мёртвым больше 15% матча — много. Участие в драках у кора ниже 50%, у саппорта ниже 60% — мало.
 5. Предметы упоминай только из фактов. Предлагать предмет можно, только если в фактах есть причина (например, больше всего урона от одного героя) — и пиши осторожно: «можно было рассмотреть».
@@ -128,6 +129,58 @@ function serverFacts(m, me, C) {
   // командный контекст: кто лучший по ценности у врагов
   const fTop = [...foes].sort((a, b) => (b.net_worth || 0) - (a.net_worth || 0))[0];
   if (fTop) f.enemy_richest = `${hero(fTop.hero_id)} — ${nf(fTop.net_worth || 0)}`;
+
+  // ДИАГНОЗ: ошибки и плюсы по правилам (вес — насколько сильно повлияло), нейросеть только объясняет их
+  const bad = [], good = [];
+  const mins = dur / 60;
+  if (me.kills != null) f.kda = `${me.kills}/${me.deaths}/${me.assists}`;
+  // 1. время мёртвым
+  if (me.life_state && dur) {
+    const ls = me.life_state, total = Object.values(ls).reduce((a, b) => a + b, 0);
+    const pct = total ? ((ls['1'] || 0) + (ls['2'] || 0)) / total * 100 : 0;
+    if (pct >= 15) bad.push([pct >= 22 ? 9 : 7, `Много времени мёртвым: ${f.time_dead}. Каждая смерть — потерянные золото, опыт и карта без тебя.`]);
+    else if (pct <= 7 && dur > 1200) good.push(`Почти не умирал: мёртвым всего ${f.time_dead}.`);
+  }
+  // 2. смерти на линии
+  const lp = f.lane_phase_10min;
+  const d10 = lp ? Number((lp.you.match(/смертей до 10:00: (\d+)/) || [])[1] || 0) : 0;
+  if (d10 >= 2) bad.push([8, `${d10} ${d10 % 10 >= 2 && d10 % 10 <= 4 && (d10 % 100 < 12 || d10 % 100 > 14) ? 'смерти' : 'смертей'} до 10:00 — линия начиналась с отставания.`]);
+  // 3. итог линии
+  if (lp && lp.enemies_on_lane.length) {
+    const nw10 = p => at(p.networth_t, 10) ?? at(p.gold_t, 10) ?? 0;
+    const opp = foes.filter(p => p.lane === me.lane), allies = mine.filter(p => p.lane === me.lane);
+    const diff = allies.reduce((s, p) => s + nw10(p), 0) - opp.reduce((s, p) => s + nw10(p), 0);
+    const vs = opp.map(p => hero(p.hero_id)).join(' и ');
+    if (diff <= -800) bad.push([diff <= -2000 ? 8 : 6, `Линия против ${vs} проиграна: к 10:00 твоя сторона отстаёт на ${nf(-diff)} ценности.`]);
+    else if (diff >= 800) good.push(`Линия против ${vs} выиграна: к 10:00 твоя сторона впереди на ${nf(diff)} ценности.`);
+  }
+  // 4. добивания на линии у кора — к норме его линии
+  if (!supp && lh10 != null) {
+    const norm = me.lane_role === 2 ? 40 : me.lane_role === 3 ? 25 : 45;
+    if (lh10 < norm * 0.7) bad.push([6, `Добиваний к 10:00 — ${lh10} при ориентире около ${norm} для этой линии: мало фарма в начале.`]);
+    else if (lh10 >= norm) good.push(`Хорошо фармил линию: ${lh10} добиваний к 10:00.`);
+  }
+  // 5. участие в драках
+  if (f.teamfight_participation_pct != null) {
+    const tp = f.teamfight_participation_pct, low = supp ? 60 : 50;
+    if (tp < low) bad.push([5, `Участие в убийствах команды ${tp}% — ${supp ? 'саппорту' : 'кору'} стоит быть в драках чаще (ориентир от ${low}%).`]);
+    else if (tp >= 70) good.push(`Был почти во всех драках: участие ${tp}%.`);
+  }
+  // 6. варды у саппорта
+  if (supp && me.obs_placed != null && mins >= 20) {
+    if (me.obs_placed < mins / 6) bad.push([4, `Мало обзора: ${me.obs_placed} обсерверов за ${Math.round(mins)} минут (ориентир — хотя бы один каждые 5–6 минут).`]);
+    else if (me.obs_placed >= mins / 4) good.push(`Хороший обзор: ${me.obs_placed} обсерверов.`);
+  }
+  // 7. кто больше всего бил — повод для защитного предмета
+  if (me.damage_taken) {
+    const selfNpc = C.heroes[me.hero_id]?.npc;
+    const rows = Object.entries(me.damage_taken).filter(([k]) => npcToName[k] && k !== selfNpc);
+    const total = rows.reduce((a, [, v]) => a + v, 0);
+    const [k, v] = rows.sort((a, b) => b[1] - a[1])[0] || [];
+    if (k && total && v / total >= 0.35) bad.push([3, `Больше всего урона (${Math.round(v / total * 100)}%) тебе нанёс ${npcToName[k]} — против него нужен план: позиция дальше, защитный предмет или ждать, пока он потратит способности.`]);
+  }
+  f.diagnosis = bad.sort((a, b) => b[0] - a[0]).map(x => x[1]);
+  f.good = good;
   return f;
 }
 
@@ -222,12 +275,12 @@ export default {
       { role: 'system', content: SYSTEM + (body.lang === 'en' ? '\n\nОтвечай на английском языке.' : '') },
       { role: 'user', content: 'client_facts:\n' + JSON.stringify(facts) + '\n\nmatch_facts:\n' + (mf ? JSON.stringify(mf) : 'нет (полный матч недоступен)') },
     ];
-    let text = null, lastErr = null;
+    let text = null, lastErr = null, used = null;
     for (const model of MODELS) {
       try {
         const res = await env.AI.run(model, { messages, max_tokens: 700, temperature: 0.25 });
         text = (res && (res.response || res.result?.response) || '').trim();
-        if (text) break;
+        if (text) { used = model; break; }
       } catch (e) { lastErr = e; }
     }
     if (!text) {
@@ -236,6 +289,6 @@ export default {
       return json({ error: limit ? 'Дневной лимит ИИ исчерпан. Попробуй завтра.' : 'ИИ сейчас недоступен. Попробуй позже.' }, limit ? 429 : 502, origin);
     }
     ctx.waitUntil(cache.put(key, new Response(text, { headers: { 'Cache-Control': 'public, max-age=604800' } })));
-    return json({ text, v: PROMPT_VERSION, match_facts: !!mf, match_facts_error: mfErr }, 200, origin);
+    return json({ text, v: PROMPT_VERSION, model: used, match_facts: !!mf, match_facts_error: mfErr, diagnosis: mf ? mf.diagnosis : null }, 200, origin);
   },
 };
