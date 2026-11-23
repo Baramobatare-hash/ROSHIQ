@@ -221,7 +221,7 @@ function facts(m,me,tl){
   const buys=(me.purchase_log||[]).filter(b=>b.time>0&&!/recipe|ward|tango|flask|clarity|tpscroll|smoke|dust|branches|faerie|enchanted_mango|blood_grenade|tome/.test(b.key)).slice(0,14).map(b=>clock(b.time)+' '+b.key.replace(/_/g,' '));
   return {
     hero:heroName(me.hero_id), result:m.radiant_win==null?'неизвестно':(m.radiant_win===rad?'победа':'поражение'), duration:clock(m.duration),
-    lane_role:{1:'лёгкая линия (керри)',2:'мид',3:'сложная линия',4:'роуминг/джунгли'}[me.lane_role]||'неизвестна', lane_efficiency_pct:me.lane_efficiency_pct??null,
+    lane:{1:'лёгкая линия',2:'центральная линия',3:'сложная линия',4:'лес/роуминг'}[me.lane_role]||'неизвестна', core_or_support:me.is_roaming?'роумер':(me.last_hits!=null&&m.duration?((me.last_hits/(m.duration/60))<2.5?'похоже на саппорта (мало добиваний)':'похоже на кора'):'неизвестно'), lane_efficiency_pct:me.lane_efficiency_pct??null,
     kda:`${me.kills}/${me.deaths}/${me.assists}`, gpm:me.gold_per_min, xpm:me.xp_per_min, last_hits:me.last_hits, denies:me.denies,
     last_hits_10min:at(me.lh_t,10), net_worth:me.net_worth, level:me.level, hero_damage:me.hero_damage, tower_damage:me.tower_damage, healing:me.hero_healing,
     stuns_sec:me.stuns!=null?Math.round(me.stuns):null, obs_placed:me.obs_placed??null, sen_placed:me.sen_placed??null, camps_stacked:me.camps_stacked??null,
@@ -242,12 +242,13 @@ async function explain(m,me,tl){
   const btn=$('aiGo'),box=$('aiOut');btn.disabled=true;btn.textContent='Думаю…';
   box.innerHTML='<p class="verdict">Нейросеть разбирает матч, это занимает 10–30 секунд.</p>';
   try{
-    const r=await fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({match:m.match_id,slot:me.player_slot,facts:facts(m,me,tl)})});
+    const body=JSON.stringify({match:m.match_id,slot:me.player_slot,facts:facts(m,me,tl)}),send=()=>fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json'},body});
+    let r;try{r=await send()}catch(e){await new Promise(z=>setTimeout(z,1500));r=await send()}
     const j=await r.json().catch(()=>({}));
     if(!r.ok||!j.text)throw new Error(j.error||(r.status===429?'Слишком много запросов. Попробуй через минуту.':'ИИ сейчас недоступен. Попробуй позже.'));
     box.innerHTML=aiHtml(j.text)+'<p class="note">Объяснение пишет нейросеть по цифрам матча из OpenDota. Она может ошибаться — сверяйся с графиком и эпизодами выше.</p>';
     btn.remove();
-  }catch(e){box.innerHTML=`<p class="verdict">${esc(e.message||'ИИ сейчас недоступен. Попробуй позже.')}</p>`;btn.disabled=false;btn.textContent='Попробовать снова'}
+  }catch(e){box.innerHTML=`<p class="verdict">${esc(/fetch|network/i.test(e.message||'')?'Не удалось связаться с ИИ. Проверь интернет и попробуй ещё раз.':(e.message||'ИИ сейчас недоступен. Попробуй позже.'))}</p>`;btn.disabled=false;btn.textContent='Попробовать снова'}
 }
 function cta(){return `<div class="card"><h2>Подсказки прямо во время игры</h2><p class="verdict">ROSHIQ для Windows подсказывает в матче — драфт, сборки, таймеры, Рошан — и сам делает такой разбор после игры. Бесплатно.</p><div class="cta"><a class="btn" href="${SITE}" target="_blank" rel="noopener">ROSHIQ для ПК</a></div></div>`}
 
