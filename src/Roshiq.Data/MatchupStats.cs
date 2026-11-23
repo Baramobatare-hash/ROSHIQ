@@ -396,6 +396,13 @@ public sealed class OpenDotaClient : IDisposable
         return MatchRowFor(doc.RootElement, accountId);
     }
 
+    /// <summary>0.26.1: урезанная копия матча для сервера ИИ-объяснения и слот игрока accountId.</summary>
+    public async Task<(System.Text.Json.Nodes.JsonObject Slice, int? Slot)> GetMatchSliceAsync(long matchId, long accountId, CancellationToken ct)
+    {
+        using var doc = await GetDocumentAsync($"/matches/{matchId}", ct).ConfigureAwait(false);
+        return MatchSlice.Build(doc.RootElement, accountId);
+    }
+
     public static RecentMatchRow? MatchRowFor(JsonElement root, long accountId)
     {
         if (!root.TryGetProperty("players", out var players) || players.ValueKind != JsonValueKind.Array) return null;

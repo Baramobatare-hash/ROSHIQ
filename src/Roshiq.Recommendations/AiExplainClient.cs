@@ -25,16 +25,20 @@ public sealed class AiExplainClient
     }
 
     /// <summary>Текст объяснения или (null, причина) — причина уже готова для показа.</summary>
+    /// <param name="od">0.26.1: урезанная копия матча OpenDota (MatchSlice) — из неё сервер считает подробные факты.</param>
+    /// <param name="slot">Слот игрока в матче (player_slot), если известен.</param>
     public async Task<(string? Text, string? Error)> ExplainAsync(MatchReview review, IReadOnlyDictionary<string, object?> facts,
-        Language lang, CancellationToken ct = default)
+        Language lang, CancellationToken ct = default, System.Text.Json.Nodes.JsonObject? od = null, int? slot = null)
     {
-        var body = JsonSerializer.Serialize(new
+        var payload = new System.Text.Json.Nodes.JsonObject
         {
-            match = review.MatchId,
-            slot = 0,
-            lang = lang == Language.English ? "en" : "ru",
-            facts,
-        });
+            ["match"] = review.MatchId,
+            ["lang"] = lang == Language.English ? "en" : "ru",
+            ["facts"] = JsonSerializer.SerializeToNode(facts),
+        };
+        if (slot is int s) payload["slot"] = s;
+        if (od != null) payload["od"] = od;
+        var body = payload.ToJsonString();
         for (int attempt = 0; attempt < 2; attempt++)
         {
             try

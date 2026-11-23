@@ -233,6 +233,27 @@ function facts(m,me,tl){
     item_timings:buys
   };
 }
+// Урезанная копия матча OpenDota для сервера ИИ: только поля, нужные для фактов (5–10 КБ вместо мегабайта).
+function odSlice(m, me) {
+  const head = a => Array.isArray(a) ? a.slice(0, 11) : undefined;
+  const players = m.players.map(p => {
+    const s = {
+      player_slot: p.player_slot, hero_id: p.hero_id, net_worth: p.net_worth, last_hits: p.last_hits, kills: p.kills, deaths: p.deaths, assists: p.assists,
+      lane: p.lane, lane_role: p.lane_role, is_roaming: p.is_roaming,
+      lh_t: head(p.lh_t), dn_t: head(p.dn_t), networth_t: head(p.networth_t), gold_t: head(p.gold_t),
+      item_0: p.item_0, item_1: p.item_1, item_2: p.item_2, item_3: p.item_3, item_4: p.item_4, item_5: p.item_5,
+      kills_log: (p.kills_log || []).filter(k => k.time <= 600).map(k => ({ time: k.time, key: k.key })),
+    };
+    if (p === me) Object.assign(s, {
+      rank_tier: p.rank_tier, life_state: p.life_state, teamfight_participation: p.teamfight_participation,
+      buyback_log: (p.buyback_log || []).map(b => ({ time: b.time })), damage_taken: p.damage_taken, killed_by: p.killed_by,
+      purchase_log: (p.purchase_log || []).filter(b => b.time > 0).map(b => ({ time: b.time, key: b.key })),
+      obs_placed: p.obs_placed, sen_placed: p.sen_placed, camps_stacked: p.camps_stacked, stuns: p.stuns, tower_damage: p.tower_damage,
+    });
+    return s;
+  });
+  return { duration: m.duration, avg_rank_tier: m.avg_rank_tier, radiant_win: m.radiant_win, players };
+}
 function aiHtml(t){
   const lines=String(t).split(/\n+/).map(x=>x.trim()).filter(Boolean);let h='',ul=false;
   for(const l of lines){const li=l.match(/^[-•*]\s+(.*)/);if(li){if(!ul){h+='<ul>';ul=true}h+='<li>'+esc(li[1]).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')+'</li>'}else{if(ul){h+='</ul>';ul=false}h+='<p>'+esc(l.replace(/^#+\s*/,'')).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')+'</p>'}}
@@ -242,7 +263,7 @@ async function explain(m,me,tl){
   const btn=$('aiGo'),box=$('aiOut');btn.disabled=true;btn.textContent='Думаю…';
   box.innerHTML='<p class="verdict">Нейросеть разбирает матч, это занимает 10–30 секунд.</p>';
   try{
-    const body=JSON.stringify({match:m.match_id,slot:me.player_slot,facts:facts(m,me,tl)}),send=()=>fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json'},body});
+    const body=JSON.stringify({match:m.match_id,slot:me.player_slot,facts:facts(m,me,tl),od:odSlice(m,me)}),send=()=>fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json'},body});
     let r;try{r=await send()}catch(e){await new Promise(z=>setTimeout(z,1500));r=await send()}
     const j=await r.json().catch(()=>({}));
     if(!r.ok||!j.text)throw new Error(j.error||(r.status===429?'Слишком много запросов. Попробуй через минуту.':'ИИ сейчас недоступен. Попробуй позже.'));

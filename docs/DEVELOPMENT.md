@@ -89,7 +89,7 @@
 |---|---|---|
 | Всегда, только локально | `http://127.0.0.1:{порт}/` — входящие POST от Dota 2 | Game State Integration |
 | Статистика, мета, разбор матча (если разрешено) | `api.opendota.com/api/…`: `heroes/{id}/matchups`, `heroes/{id}/itemPopularity`, `constants/*`, `players/{id}`, `players/{id}/heroes`, `players/{id}/recentMatches`, `matches/{id}`, `request/{id}`, `scenarios/itemTimings` | публичная статистика по героям и вашим публичным матчам |
-| ИИ-объяснение матча (по кнопке «Объяснить ошибки», если разрешена загрузка с OpenDota) | `roshiq-ai.baramobatare.workers.dev/explain` — POST | цифры разбора матча без ника и Steam ID; нейросеть Cloudflare Workers AI отвечает текстом, на компьютер ничего не ставится |
+| ИИ-объяснение матча (по кнопке «Объяснить ошибки», если разрешена загрузка с OpenDota) | `roshiq-ai.baramobatare.workers.dev/explain` — POST | цифры разбора и урезанная копия матча из OpenDota (линия, время мёртвым, предметы) — без ников и Steam ID; нейросеть Cloudflare Workers AI отвечает текстом, на компьютер ничего не ставится. Исходник сервера — `tools/ai-worker/` |
 | Иконки предметов (если разрешено) | `cdn.akamai.steamstatic.com/apps/dota2/images/dota_react/items/` | картинки предметов, кешируются |
 | Обновления программы (если разрешено) | `api.github.com/repos/…/releases/latest`, файлы релиза | новая версия и проверка контрольной суммы |
 | Обновления данных (если разрешено, раз в сутки) | `raw.githubusercontent.com/…/main/src/Roshiq.Data/Resources/` | герои, предметы, таймеры без переустановки |

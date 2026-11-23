@@ -341,7 +341,19 @@ public partial class HistoryView
                 var facts = MatchAiFacts.Build(review,
                     id => App.Host.Database.FindHero(id)?.Name ?? "?",
                     key => App.Host.Database.FindItem(key)?.Name ?? key);
-                var (text, error) = await _ai.ExplainAsync(review, facts, L.Language);
+                // 0.26.1: урезанная копия матча — из неё сервер считает линию, соперников, время мёртвым и т. п.
+                System.Text.Json.Nodes.JsonObject? od = null;
+                int? slot = null;
+                if (App.Host.SteamAccount is long account && long.TryParse(review.MatchId, NumberStyles.None, CultureInfo.InvariantCulture, out var mid))
+                {
+                    try
+                    {
+                        using var client = new Roshiq.Data.OpenDotaClient(App.Host.Settings.Current.Data.OpenDotaApiKey);
+                        (od, slot) = await client.GetMatchSliceAsync(mid, account, CancellationToken.None);
+                    }
+                    catch (Exception ex) { Log.Warn("ИИ-объяснение: матч из OpenDota не получен: " + ex.Message); }
+                }
+                var (text, error) = await _ai.ExplainAsync(review, facts, L.Language, CancellationToken.None, od, slot);
                 if (text != null)
                 {
                     review.AiText = text;

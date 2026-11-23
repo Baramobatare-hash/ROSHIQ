@@ -115,4 +115,52 @@ public class AiExplainTests
         Assert.Equal("The daily AI limit is used up. Try tomorrow.", error);
         Assert.Equal(1, h.Calls);
     }
+
+    [Fact]
+    public void Slice_KeepsOnlyNeededFields_AndFindsSlot()
+    {
+        var json = """
+        {"match_id": 1, "duration": 2400, "avg_rank_tier": 25, "radiant_win": false, "chat": [{"key": "gg"}],
+         "players": [
+          {"account_id": 42, "personaname": "Me", "player_slot": 130, "hero_id": 1, "net_worth": 12000, "last_hits": 190, "lane": 1, "lane_role": 1,
+           "lh_t": [0,1,2,3,4,5,6,7,8,9,10,11,12,13], "life_state": {"0": 2000, "1": 300, "2": 100}, "teamfight_participation": 0.4,
+           "damage_taken": {"npc_dota_hero_lion": 5000}, "killed_by": {"npc_dota_hero_lion": 4},
+           "purchase_log": [{"time": -60, "key": "tango"}, {"time": 1150, "key": "bfury", "charges": 1}],
+           "kills_log": [{"time": 300, "key": "npc_dota_hero_lion"}, {"time": 900, "key": "npc_dota_hero_axe"}], "buyback_log": [{"time": 2000, "slot": 3}]},
+          {"account_id": 7, "personaname": "Other", "player_slot": 0, "hero_id": 26, "net_worth": 8000, "lane": 1,
+           "lh_t": [0,1,2], "damage_taken": {"x": 1}, "purchase_log": [{"time": 100, "key": "blink"}]}
+         ]}
+        """;
+        using var doc = JsonDocument.Parse(json);
+        var (slice, slot) = MatchSlice.Build(doc.RootElement, 42);
+        Assert.Equal(130, slot);
+        var text = slice.ToJsonString();
+        Assert.DoesNotContain("personaname", text);
+        Assert.DoesNotContain("account_id", text);
+        Assert.DoesNotContain("chat", text);
+        var me = slice["players"]![0]!;
+        Assert.Equal(11, me["lh_t"]!.AsArray().Count);
+        Assert.Single(me["purchase_log"]!.AsArray());
+        Assert.Single(me["kills_log"]!.AsArray());
+        Assert.NotNull(me["life_state"]);
+        var other = slice["players"]![1]!;
+        Assert.Null(other["damage_taken"]);
+        Assert.Null(other["purchase_log"]);
+        Assert.Equal(2400, slice["duration"]!.GetValue<int>());
+    }
+
+    [Fact]
+    public async Task Client_SendsSliceAndSlot()
+    {
+        string? sent = null;
+        var h = new FakeHandler(req => { sent = req.Content!.ReadAsStringAsync().Result; return Json(HttpStatusCode.OK, "{\"text\":\"ok\"}"); });
+        var c = new AiExplainClient("0.26.1", h);
+        var r = Review();
+        var od = new System.Text.Json.Nodes.JsonObject { ["duration"] = 2410 };
+        await c.ExplainAsync(r, Facts(r), Language.Russian, CancellationToken.None, od, 130);
+        using var doc = JsonDocument.Parse(sent!);
+        Assert.Equal(130, doc.RootElement.GetProperty("slot").GetInt32());
+        Assert.Equal(2410, doc.RootElement.GetProperty("od").GetProperty("duration").GetInt32());
+        Assert.Equal("Anti-Mage", doc.RootElement.GetProperty("facts").GetProperty("hero").GetString());
+    }
 }
