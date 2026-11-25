@@ -143,4 +143,15 @@ public class RankEstimateTests
         Assert.Equal(0.4, p, 3);        // 40% пути
         Assert.Equal((80, (int?)null, 1.0), RankEstimator.Progress(35));
     }
+
+    [Fact]
+    public void SteamCommunity_ParsesAvatarAndName()
+    {
+        const string xml = "<profile><steamID64>76561199791836141</steamID64><steamID><![CDATA[FIGI6]]></steamID>"
+            + "<avatarFull><![CDATA[https://avatars.steamstatic.com/abc_full.jpg]]></avatarFull></profile>";
+        var (name, avatar) = SteamCommunity.Parse(xml);
+        Assert.Equal("FIGI6", name);
+        Assert.Equal("https://avatars.steamstatic.com/abc_full.jpg", avatar);
+        Assert.Equal((null, null), SteamCommunity.Parse("<response><error>The specified profile could not be found.</error></response>"));
+    }
 }

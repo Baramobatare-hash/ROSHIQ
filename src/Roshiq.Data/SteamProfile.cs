@@ -151,6 +151,42 @@ public static class SteamOpenId
     }
 }
 
+/// <summary>
+/// Свежие ник и аватар прямо из открытого профиля Steam (steamcommunity.com/profiles/…?xml=1, без ключа).
+/// OpenDota обновляет аватар только при своей переиндексации, поэтому после смены аватарки в Steam он долго старый.
+/// </summary>
+public static class SteamCommunity
+{
+    private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
+    private static readonly Regex Avatar = new(@"<avatarFull><!\[CDATA\[(https://[^\]]+)\]\]></avatarFull>", RegexOptions.CultureInvariant);
+    private static readonly Regex Name = new(@"<steamID><!\[CDATA\[(.*?)\]\]></steamID>", RegexOptions.CultureInvariant | RegexOptions.Singleline);
+
+    /// <summary>(ник, ссылка на аватар) или null, если профиль закрыт или Steam не ответил.</summary>
+    public static async Task<(string? Name, string? AvatarUrl)?> GetAsync(long accountId, CancellationToken ct)
+    {
+        long id64 = accountId + 76561197960265728L;
+        var url = $"https://steamcommunity.com/profiles/{id64}/?xml=1";
+        try
+        {
+            var xml = await Http.GetStringAsync(url, ct).ConfigureAwait(false);
+            var avatar = Avatar.Match(xml) is { Success: true } a ? a.Groups[1].Value : null;
+            var name = Name.Match(xml) is { Success: true } n ? n.Groups[1].Value.Trim() : null;
+            NetworkLog.Record("GET", url, avatar != null ? "OK" : "нет аватара");
+            return avatar == null && name == null ? null : (string.IsNullOrEmpty(name) ? null : name, avatar);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            NetworkLog.Record("GET", url, "ошибка: " + ex.Message);
+            return null;
+        }
+    }
+
+    /// <summary>Разобрать ответ Steam (для тестов).</summary>
+    public static (string? Name, string? AvatarUrl) Parse(string xml) =>
+        (Name.Match(xml) is { Success: true } n ? n.Groups[1].Value.Trim() : null,
+         Avatar.Match(xml) is { Success: true } a ? a.Groups[1].Value : null);
+}
+
 /// <summary>Профиль игрока в OpenDota.</summary>
 public sealed record PlayerProfile(long AccountId, string? Name, string? AvatarUrl, int? RankTier, int? LeaderboardRank);
 

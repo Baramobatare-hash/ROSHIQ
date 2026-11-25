@@ -1285,6 +1285,10 @@ public sealed class AppHost : IDisposable
             using var client = new OpenDotaClient(d.OpenDotaApiKey);
             var profile = await client.GetPlayerProfileAsync(account, CancellationToken.None);
             var heroes = await client.GetPlayerHeroesAsync(account, CancellationToken.None);
+            // аватар и ник — прямо из Steam: у OpenDota они обновляются с большой задержкой
+            var steam = await SteamCommunity.GetAsync(account, CancellationToken.None);
+            // и попросить OpenDota переиндексировать профиль, чтобы и у неё всё обновилось
+            await client.RefreshPlayerAsync(account, CancellationToken.None);
             // примерный рейтинг по соперникам; не получилось — профиль всё равно обновляем
             RankEstimate? estimate = null, previous = null;
             IReadOnlyList<RankEstimate> history = Array.Empty<RankEstimate>();
@@ -1309,6 +1313,11 @@ public sealed class AppHost : IDisposable
                     s.Data.SteamAvatarUrl = profile.AvatarUrl;
                     s.Data.RankTier = profile.RankTier;
                     s.Data.LeaderboardRank = profile.LeaderboardRank;
+                }
+                if (steam is { } st)
+                {
+                    if (st.AvatarUrl != null) s.Data.SteamAvatarUrl = st.AvatarUrl;
+                    if (st.Name != null) s.Data.SteamName = st.Name;
                 }
                 if (heroes.Count > 0) s.Data.PublicMatchData = true;
                 if (estimateOk)
