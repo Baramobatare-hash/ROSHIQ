@@ -3,7 +3,7 @@
 // из OpenDota (линия, соперники, время мёртвым, участие в драках, предметы) и просит нейросеть Cloudflare Workers AI
 // объяснить ошибки. Ключей нет: модель вызывается через привязку AI (env.AI).
 
-const PROMPT_VERSION = 'v6';
+const PROMPT_VERSION = 'v7';
 const ALLOWED_ORIGINS = ['https://baramobatare-hash.github.io'];
 const MODELS = [
   '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
@@ -38,6 +38,8 @@ const SYSTEM = `Ты — тренер по Dota 2, который разбира
 - Без английских терминов, если есть русское слово (крипы, а не creep'ы).
 - Саппорту не советуй байбэки и не ругай его за фарм. Не хвали за то, чего нет в good или «плюс:».
 - Не пиши общие фразы «старайся умирать реже», «участвуй активнее» без конкретного действия.
+- Не придумывай последствия, которых нет в фактах: не пиши «из-за этого враги взяли Рошана / снесли бараки», если Рошана и строений нет в фактах. Последствие — это то, что видно в цифрах (отставание по золоту, время мёртвым, проигранная линия).
+- Минуты пиши только те, что есть в фактах.
 
 ФОРМАТ (не больше 180 слов)
 Первая строка — итог матча (match_facts.result) в одном предложении: главная причина, взятая из первого пункта diagnosis.
@@ -187,6 +189,41 @@ function serverFacts(m, me, C) {
   return f;
 }
 
+// Проверка ответа по фактам: строка с минутой, героем или объектом карты, которых нет в фактах, выкидывается.
+// Модель иногда дописывает «враги взяли Рошана на 25:00» — такого пункта в ответе быть не должно.
+const OBJECTIVES = [
+  [/рошан|аегис|аегида|roshan|aegis/i, /рошан|roshan|aegis|аегис/i],
+  [/барак|barrack/i, /барак|barrack/i],
+  [/\bтрон|throne/i, /трон|throne|ancient/i],
+  [/торментор|терзател|tormentor/i, /торментор|терзател|tormentor/i],
+  [/смок|smoke/i, /смок|smoke/i],
+  [/байб[еэ]к|выкуп|buyback/i, /байб[еэ]к|выкуп|buyback/i],
+];
+function verify(text, facts, mf, C) {
+  const known = JSON.stringify([facts, mf]);
+  const times = new Set();
+  for (const t of known.matchAll(/(\d{1,2}):(\d{2})/g)) times.add(+t[1] * 60 + +t[2]);
+  const timeOk = sec => sec % 300 === 0 || [...times].some(k => Math.abs(k - sec) <= 60);
+  const lowKnown = known.toLowerCase();
+  const heroNames = C ? Object.values(C.heroes).map(h => h.name).filter(n => n && n.length >= 3) : [];
+  const has = (hay, name) => new RegExp('(^|[^\\p{L}])' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^\\p{L}])', 'iu').test(hay);
+  const dropped = [];
+  const lines = text.split('\n').filter(line => {
+    const t = line.trim();
+    if (!t || /^\**\s*(Главные ошибки|Что получилось|В следующей игре|Main mistakes|What went well|Next game)/i.test(t)) return true;
+    for (const m of t.matchAll(/\b(\d{1,2}):(\d{2})\b/g)) if (!timeOk(+m[1] * 60 + +m[2])) { dropped.push('время ' + m[0]); return false; }
+    for (const [say, need] of OBJECTIVES) if (say.test(t) && !need.test(lowKnown)) { dropped.push('объект: ' + t.match(say)[0]); return false; }
+    for (const n of heroNames) if (has(t, n) && !has(known, n)) { dropped.push('герой ' + n); return false; }
+    return true;
+  });
+  let out = lines.join('\n');
+  // если из «Главных ошибок» ничего не осталось — подставляем найденные правилами ошибки
+  const m = out.match(/(Главные ошибки:?\**[ \t]*\n)([\s\S]*?)(?=^\s*\**\s*(?:Что получилось|В следующей игре)|(?![\s\S]))/im);
+  if (m && !/^\s*[-•*]/m.test(m[2]) && mf && mf.diagnosis && mf.diagnosis.length)
+    out = out.replace(m[0], m[1] + mf.diagnosis.slice(0, 2).map(d => '- ' + d).join('\n') + '\n' + m[2]);
+  return { text: out, dropped };
+}
+
 // Убрать раздел «Что получилось», если плюсов нет (модель иногда пишет «нет успехов»)
 function tidy(text, mf, facts) {
   const plus = (mf && mf.good && mf.good.length) || (Array.isArray(facts.analyzer_findings) && facts.analyzer_findings.some(x => /^плюс:/.test(x)));
@@ -296,12 +333,18 @@ export default {
       { role: 'system', content: SYSTEM + (body.lang === 'en' ? '\n\nОтвечай на английском языке.' : '') },
       { role: 'user', content: 'client_facts:\n' + JSON.stringify(facts) + '\n\nmatch_facts:\n' + (mf ? JSON.stringify(mf) : 'нет (полный матч недоступен)') },
     ];
-    let text = null, lastErr = null, used = null;
+    let text = null, lastErr = null, used = null, checked = [];
     for (const model of MODELS) {
       try {
         const res = await env.AI.run(model, { messages, max_tokens: 700, temperature: 0.25 });
         text = (res && (res.response || res.result?.response) || '').trim();
-        if (text) { text = tidy(text, mf, facts); used = model; break; }
+        if (text) {
+          let C = null;
+          try { C = await constants(); } catch { C = null; }
+          const v = verify(text, facts, mf, C);
+          checked = v.dropped;
+          text = tidy(v.text, mf, facts); used = model; break;
+        }
       } catch (e) { lastErr = e; }
     }
     if (!text) {
@@ -310,6 +353,6 @@ export default {
       return json({ error: limit ? 'Дневной лимит ИИ исчерпан. Попробуй завтра.' : 'ИИ сейчас недоступен. Попробуй позже.' }, limit ? 429 : 502, origin);
     }
     ctx.waitUntil(cache.put(key, new Response(text, { headers: { 'Cache-Control': 'public, max-age=604800' } })));
-    return json({ text, v: PROMPT_VERSION, model: used, match_facts: !!mf, match_facts_error: mfErr, diagnosis: mf ? mf.diagnosis : null }, 200, origin);
+    return json({ text, v: PROMPT_VERSION, model: used, dropped: checked, match_facts: !!mf, match_facts_error: mfErr, diagnosis: mf ? mf.diagnosis : null }, 200, origin);
   },
 };
