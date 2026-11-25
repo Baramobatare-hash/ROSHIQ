@@ -170,6 +170,53 @@ public static class Ranks
     }
 }
 
+/// <summary>Примерный рейтинг по соперникам: вилка медалей (rank_tier) и сколько матчей в основе.</summary>
+public sealed record RankEstimate(int Low, int High, int Matches, bool SoloOnly);
+
+/// <summary>
+/// Оценка рейтинга до калибровки (или в дополнение к медали): игра подбирает матчи по скрытому рейтингу,
+/// поэтому средняя медаль игроков в рейтинговых матчах (average_rank OpenDota) показывает примерный уровень.
+/// Пати сдвигают подбор, поэтому при достатке одиночных матчей считаем только их.
+/// </summary>
+public static class RankEstimator
+{
+    public const int MinMatches = 5;
+
+    /// <summary>rank_tier → номер ступени: Рекрут 1 = 0 … Божество 5 = 34, Титан = 35.</summary>
+    public static int ToStep(int rankTier)
+    {
+        int medal = Math.Clamp(rankTier / 10, 1, 8), stars = Math.Clamp(rankTier % 10, 1, 5);
+        return medal == 8 ? 35 : (medal - 1) * 5 + (stars - 1);
+    }
+
+    public static int FromStep(int step)
+    {
+        step = Math.Clamp(step, 0, 35);
+        return step == 35 ? 80 : (step / 5 + 1) * 10 + step % 5 + 1;
+    }
+
+    /// <param name="matches">average_rank и размер пати рейтинговых матчей, новые первыми.</param>
+    public static RankEstimate? Estimate(IEnumerable<(int AverageRank, int PartySize)> matches, int take = 20)
+    {
+        var all = matches.Where(m => m.AverageRank >= 10).Take(take).ToList();
+        var solo = all.Where(m => m.PartySize <= 1).ToList();
+        bool soloOnly = solo.Count >= MinMatches;
+        var used = soloOnly ? solo : all;
+        if (used.Count < MinMatches) return null;
+        var steps = used.Select(m => ToStep(m.AverageRank)).OrderBy(x => x).ToList();
+        int Pct(double p) => steps[(int)Math.Round(p * (steps.Count - 1))];
+        return new RankEstimate(FromStep(Pct(0.25)), FromStep(Pct(0.75)), used.Count, soloOnly);
+    }
+
+    /// <summary>«Страж 5 – Рыцарь 1» или одна медаль, если границы совпали.</summary>
+    public static string Range(RankEstimate e, Language lang)
+    {
+        var lo = Ranks.Name(e.Low, null, lang) ?? "?";
+        var hi = Ranks.Name(e.High, null, lang) ?? "?";
+        return e.Low == e.High ? lo : lo + " – " + hi;
+    }
+}
+
 /// <summary>Ваша статистика на герое (все матчи из OpenDota).</summary>
 public sealed record PlayerHeroStat(int HeroId, int Games, int Wins, long LastPlayed, int AgainstGames = 0, int AgainstWins = 0)
 {

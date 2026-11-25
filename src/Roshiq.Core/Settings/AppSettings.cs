@@ -259,6 +259,11 @@ public sealed class DataSettings
     public int? RankTier { get; set; }
     public int? LeaderboardRank { get; set; }
     public DateTime? ProfileCheckedUtc { get; set; }
+    /// <summary>Примерный рейтинг по соперникам (rank_tier нижней и верхней границы), число матчей и «только соло».</summary>
+    public int? EstimatedRankLow { get; set; }
+    public int? EstimatedRankHigh { get; set; }
+    public int? EstimatedRankMatches { get; set; }
+    public bool EstimatedRankSolo { get; set; }
     /// <summary>Видит ли OpenDota ваши матчи (null — неизвестно). false — в Dota 2 выключена общедоступная история матчей.</summary>
     public bool? PublicMatchData { get; set; }
     /// <summary>Учитывать вашу статистику на героях в советах драфта.</summary>

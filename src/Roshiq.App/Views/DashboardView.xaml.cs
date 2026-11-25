@@ -108,6 +108,7 @@ public partial class DashboardView : UserControl, IRefreshable
             ProfileSub.Text = L.Get("dash_steam_link_hint");
             ProfileButton.Content = L.Get("dash_steam_link_btn").ToUpperInvariant();
             ProfileWeak.Visibility = Visibility.Collapsed;
+            ProfileRank.Visibility = Visibility.Collapsed;
             SetProfileAvatar(null);
             return;
         }
@@ -125,6 +126,7 @@ public partial class DashboardView : UserControl, IRefreshable
         }
         if (d.PublicMatchData == false) parts.Add(L.Get("steam_private_short"));
         ProfileSub.Text = parts.Count > 0 ? string.Join(" · ", parts) : L.Get("dash_steam_no_stats");
+        RefreshRankEstimate(d, L);
         ProfileButton.Content = L.Get("dash_steam_open").ToUpperInvariant();
         // что проседает чаще всего по последним разборам матчей
         if ((DateTime.UtcNow - _weakCheckedUtc).TotalSeconds > 30)
@@ -140,6 +142,31 @@ public partial class DashboardView : UserControl, IRefreshable
         }
         else ProfileWeak.Visibility = Visibility.Collapsed;
         SetProfileAvatar(d.AllowOnlineStats ? d.SteamAvatarUrl : null);
+    }
+
+    /// <summary>
+    /// Примерный рейтинг по средней медали соперников. Без медали (калибровка не пройдена) — главная строка
+    /// «Примерный рейтинг», с медалью — справочно «Соперники в среднем».
+    /// </summary>
+    private void RefreshRankEstimate(Roshiq.Core.Settings.DataSettings d, Loc L)
+    {
+        if (d.EstimatedRankLow is not int lo || d.EstimatedRankHigh is not int hi || d.EstimatedRankMatches is not int n)
+        {
+            bool noMedal = Roshiq.Data.Ranks.Name(d.RankTier, d.LeaderboardRank, L.Language) == null;
+            ProfileRank.Text = L.Get("dash_rank_estimate_none");
+            // закрытый профиль уже подписан выше — «после 5 матчей» тут было бы неправдой
+            ProfileRank.Visibility = noMedal && d.AllowOnlineStats && d.ProfileCheckedUtc != null && d.PublicMatchData != false
+                ? Visibility.Visible : Visibility.Collapsed;
+            ProfileRank.Foreground = Ui.Res("Muted");
+            ProfileRank.ToolTip = null;
+            return;
+        }
+        var range = Roshiq.Data.RankEstimator.Range(new Roshiq.Data.RankEstimate(lo, hi, n, d.EstimatedRankSolo), L.Language);
+        bool calibrated = Roshiq.Data.Ranks.Name(d.RankTier, d.LeaderboardRank, L.Language) != null;
+        ProfileRank.Text = L.Format(calibrated ? "dash_rank_opponents" : "dash_rank_estimate", range, n);
+        ProfileRank.Foreground = Ui.Res(calibrated ? "Muted" : "Text");
+        ProfileRank.ToolTip = L.Get(d.EstimatedRankSolo ? "dash_rank_estimate_tip" : "dash_rank_estimate_tip_party");
+        ProfileRank.Visibility = Visibility.Visible;
     }
 
     private void SetProfileAvatar(string? url)

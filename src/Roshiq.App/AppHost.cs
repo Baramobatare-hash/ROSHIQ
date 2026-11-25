@@ -1221,6 +1221,7 @@ public sealed class AppHost : IDisposable
                 s.Data.LeaderboardRank = null;
                 s.Data.ProfileCheckedUtc = null;
                 s.Data.PublicMatchData = null;
+                ClearRankEstimate(s);
             }
             else if (name != null) s.Data.SteamName ??= name;
         });
@@ -1251,6 +1252,7 @@ public sealed class AppHost : IDisposable
             s.Data.LeaderboardRank = null;
             s.Data.ProfileCheckedUtc = null;
             s.Data.PublicMatchData = null;
+            ClearRankEstimate(s);
         });
         PlayerHeroes.Clear();
         ApplyPool();
@@ -1258,7 +1260,15 @@ public sealed class AppHost : IDisposable
         SteamChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <summary>Обновить ник, аватар, медаль и статистику по героям из OpenDota. Возвращает текст ошибки или null.</summary>
+    private static void ClearRankEstimate(Roshiq.Core.Settings.AppSettings s)
+    {
+        s.Data.EstimatedRankLow = null;
+        s.Data.EstimatedRankHigh = null;
+        s.Data.EstimatedRankMatches = null;
+        s.Data.EstimatedRankSolo = false;
+    }
+
+    /// <summary>Обновить ник, аватар, медаль, примерный рейтинг и статистику по героям из OpenDota. Возвращает текст ошибки или null.</summary>
     public async Task<string?> RefreshSteamProfileAsync()
     {
         var d = Settings.Current.Data;
@@ -1269,6 +1279,15 @@ public sealed class AppHost : IDisposable
             using var client = new OpenDotaClient(d.OpenDotaApiKey);
             var profile = await client.GetPlayerProfileAsync(account, CancellationToken.None);
             var heroes = await client.GetPlayerHeroesAsync(account, CancellationToken.None);
+            // примерный рейтинг по соперникам; не получилось — профиль всё равно обновляем
+            RankEstimate? estimate = null;
+            bool estimateOk = false;
+            try
+            {
+                estimate = RankEstimator.Estimate(await client.GetRankedAveragesAsync(account, CancellationToken.None));
+                estimateOk = true;
+            }
+            catch (Exception ex) { Log.Warn("Оценка рейтинга: " + ex.Message); }
             if (SteamAccount != account) return null; // успели перепривязать
             PlayerHeroes.Replace(account, heroes, DateTime.UtcNow);
             Settings.Update(s =>
@@ -1282,6 +1301,17 @@ public sealed class AppHost : IDisposable
                     s.Data.LeaderboardRank = profile.LeaderboardRank;
                 }
                 if (heroes.Count > 0) s.Data.PublicMatchData = true;
+                if (estimateOk)
+                {
+                    ClearRankEstimate(s);
+                    if (estimate != null)
+                    {
+                        s.Data.EstimatedRankLow = estimate.Low;
+                        s.Data.EstimatedRankHigh = estimate.High;
+                        s.Data.EstimatedRankMatches = estimate.Matches;
+                        s.Data.EstimatedRankSolo = estimate.SoloOnly;
+                    }
+                }
             });
             ApplyPool();
             Log.Info($"Профиль Steam обновлён: {profile?.Name}, героев со статистикой {heroes.Count}");

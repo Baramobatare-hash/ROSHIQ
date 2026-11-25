@@ -334,6 +334,21 @@ public sealed class OpenDotaClient : IDisposable
         return new PlayerProfile(accountId, name, avatar, rank, lb);
     }
 
+    /// <summary>Последние рейтинговые матчи игрока: средняя медаль матча (average_rank) и размер пати. Новые первыми.</summary>
+    public async Task<IReadOnlyList<(int AverageRank, int PartySize)>> GetRankedAveragesAsync(long accountId, CancellationToken ct, int limit = 30)
+    {
+        using var doc = await GetDocumentAsync($"/players/{accountId}/matches?limit={limit}&lobby_type=7", ct).ConfigureAwait(false);
+        var list = new List<(int, int)>();
+        if (doc.RootElement.ValueKind != JsonValueKind.Array) return list;
+        foreach (var e in doc.RootElement.EnumerateArray())
+        {
+            int avg = e.TryGetProperty("average_rank", out var a) && a.ValueKind == JsonValueKind.Number ? a.GetInt32() : 0;
+            int party = e.TryGetProperty("party_size", out var p) && p.ValueKind == JsonValueKind.Number ? p.GetInt32() : 1;
+            list.Add((avg, party));
+        }
+        return list;
+    }
+
     /// <summary>Ваша статистика по всем героям (игры, победы).</summary>
     public async Task<IReadOnlyList<PlayerHeroStat>> GetPlayerHeroesAsync(long accountId, CancellationToken ct)
     {

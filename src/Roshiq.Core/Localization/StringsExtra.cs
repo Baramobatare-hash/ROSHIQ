@@ -967,6 +967,13 @@ internal static class StringsExtra
             "From game data (GSI) over the last 50 matches. Brighter spots mean more deaths; hover a dot for time, hero and match."),
         ["deathmap_none"] = ("Пока нет смертей с координатами — появятся после матчей с ROSHIQ 0.10.", "No deaths with positions yet — they appear after matches with ROSHIQ 0.10."),
         ["deathmap_line"] = ("{0} смертей за {1} матчей", "{0} deaths in {1} matches"),
+        ["dash_rank_estimate"] = ("Примерный рейтинг: {0} — по соперникам, {1} рейтинговых матчей", "Estimated rank: {0}, based on opponents in {1} ranked matches"),
+        ["dash_rank_opponents"] = ("Соперники в среднем: {0} ({1} рейтинговых матчей)", "Opponents on average: {0} ({1} ranked matches)"),
+        ["dash_rank_estimate_none"] = ("Примерный рейтинг появится после 5 рейтинговых матчей", "An estimated rank appears after 5 ranked matches"),
+        ["dash_rank_estimate_tip"] = ("Игра подбирает матчи по скрытому рейтингу, поэтому средняя медаль игроков в ваших последних одиночных рейтинговых матчах показывает ваш уровень. Это оценка, а не медаль: в первых играх калибровки она может заметно меняться.",
+            "The game matches you by a hidden rating, so the average medal in your recent solo ranked matches shows your level. It is an estimate, not a medal: during the first calibration games it can shift noticeably."),
+        ["dash_rank_estimate_tip_party"] = ("Игра подбирает матчи по скрытому рейтингу, поэтому средняя медаль игроков в ваших последних рейтинговых матчах показывает ваш уровень. Одиночных матчей пока мало, поэтому учтены и игры в группе — они сдвигают оценку к рейтингу группы.",
+            "The game matches you by a hidden rating, so the average medal in your recent ranked matches shows your level. There are few solo matches yet, so party games are counted too: they pull the estimate toward the party's rating."),
         ["dash_weak"] = ("Проседает: {0} — в среднем хуже, чем у {1}% игроков на ваших героях ({2} матчей)", "Weak spot: {0} — on average below {1}% of players on your heroes ({2} matches)"),
         ["set_auto_review"] = ("Разбор матча через OpenDota", "Match review via OpenDota"),
         // ---------- Steam (0.9)
