@@ -939,7 +939,8 @@ public sealed class AppHost : IDisposable
     /// <summary>Советы на линию против вероятных соперников (от трёх видимых врагов).</summary>
     public IReadOnlyList<LaneOpponentAdvice> LaneAdvice =>
         CurrentBriefing is { } b && DraftIsCurrent
-            ? LaneAdvisor.Advise(b.LaneOpponents, Database.LaneTips, Analyzer.PersonalAgainst)
+            ? LaneAdvisor.Advise(b.LaneOpponents, Database.LaneTips, Analyzer.PersonalAgainst,
+                lane: CurrentHero is { } me ? opp => Database.LaneVs(me.Id, opp.Id) : null)
             : Array.Empty<LaneOpponentAdvice>();
 
     /// <summary>Сравнение составов по фазам (нужно хотя бы 3 союзника и 3 врага).</summary>
@@ -964,6 +965,8 @@ public sealed class AppHost : IDisposable
         foreach (var a in LaneAdvice)
         {
             var parts = a.Tips.Select(t => L.Language == Language.Russian ? t.Ru : t.En).ToList();
+            // статистика линии именно против этого героя (STRATZ) — первой: она конкретнее общего совета
+            if (a.LaneLine(L.Language) is { Length: > 0 } laneLine) parts.Insert(0, laneLine);
             if (a.Personal(L.Language) is { Length: > 0 } personal) parts.Add(personal);
             if (NoteFor(a.Hero) is string note) parts.Insert(0, Short(note, 100));
             if (parts.Count > 0) rows.Add(new OverlayRow(a.Hero.DisplayName(L.Language), string.Join(" ", parts.Take(2))) { Icon = HeroArt.Portrait(a.Hero.Key) });
@@ -990,11 +993,12 @@ public sealed class AppHost : IDisposable
         var matchId = snap.MatchId;
         if (a.LaneTips && clock is >= 0 and < 40 && _spikesShown.Add("lane_start"))
         {
-            var advice = LaneAdvice.Where(x => x.Tips.Count > 0).Take(2).ToList();
+            var advice = LaneAdvice.Where(x => x.Tips.Count > 0 || x.LaneLine(L.Language).Length > 0).Take(2).ToList();
             if (advice.Count > 0)
             {
                 ShowEventToast(L.Get("lane_title").ToUpperInvariant(), string.Join("  ", advice.Select(x =>
-                    x.Hero.DisplayName(L.Language) + ": " + (L.Language == Language.Russian ? x.Tips[0].Ru : x.Tips[0].En))),
+                    x.Hero.DisplayName(L.Language) + ": " + (x.LaneLine(L.Language) is { Length: > 0 } ll ? ll
+                        : L.Language == Language.Russian ? x.Tips[0].Ru : x.Tips[0].En))),
                     kind: "lane", ttlSec: 90, inGame: true, stillValid: () => LiveClock(matchId) is int c && c < LaneTipUntil);
             }
         }
@@ -2327,7 +2331,9 @@ public sealed class AppHost : IDisposable
             rows.Add((L.Get("brief_lane"), string.Join(", ", b.LaneOpponents.Select(h => h.DisplayName(L.Language)))));
         if (Settings.Current.Automation.LaneTips)
             foreach (var a in LaneAdvice.Take(2))
-                if (a.Tips.FirstOrDefault() is { } tip)
+                if (a.LaneLine(L.Language) is { Length: > 0 } laneLine)
+                    rows.Add((a.Hero.DisplayName(L.Language), laneLine));
+                else if (a.Tips.FirstOrDefault() is { } tip)
                     rows.Add((a.Hero.DisplayName(L.Language), L.Language == Language.Russian ? tip.Ru : tip.En));
         if (BriefingItem is ItemPick item)
             rows.Add((L.Get("brief_item"), item.Item.DisplayName(L.Language)));

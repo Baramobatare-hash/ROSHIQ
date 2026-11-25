@@ -576,6 +576,67 @@ def full(token):
     bump_version(day)
 
 
+# ---------------------------------------------------------------- итоги линии по парам героев
+
+MIN_LANE_MATCHES = 150
+
+
+def fetch_lane(token, hero_id):
+    """Итоги линии героя против каждого соперника за последнюю неделю (все ранги, все позиции)."""
+    q = ("query{ heroStats{ laneOutcome(heroId:%d, isWith:false){ heroId1 heroId2 matchCount winCount drawCount lossCount"
+         " stompWinCount stompLossCount } } }" % hero_id)
+    return gql(token, q)["heroStats"]["laneOutcome"] or []
+
+
+def lane_matchups(token):
+    """lane_matchups.txt: герой|соперник|линий|выиграно|вничью|проиграно|всухую+|всухую− с точки зрения первого героя."""
+    heroes = {int(r[0]): r[1] for r in read_rows("heroes.txt", 6)}
+    agg, calls = {}, 0
+    for h in sorted(heroes):
+        try:
+            rows = fetch_lane(token, h)
+        except Exception as e:
+            print(f"  линия {heroes[h]}: ошибка {str(e)[:200]}")
+            continue
+        calls += 1
+        if calls <= 2:
+            print(f"  линия {heroes[h]}: строк {len(rows)}; пример {json.dumps(rows[:2], ensure_ascii=False)[:300]}")
+        for r in rows:
+            a, b = int(r.get("heroId1") or h), int(r.get("heroId2") or 0)
+            w, l = int(r.get("winCount") or 0), int(r.get("lossCount") or 0)
+            sw, sl = int(r.get("stompWinCount") or 0), int(r.get("stompLossCount") or 0)
+            if a != h and b == h:                      # строка с точки зрения соперника — переворачиваем
+                a, b, w, l, sw, sl = h, a, l, w, sl, sw
+            if a != h or b not in heroes or b == h:
+                continue
+            cur = agg.setdefault((h, b), [0, 0, 0, 0, 0, 0])
+            for i, v in enumerate((int(r.get("matchCount") or 0), w, int(r.get("drawCount") or 0), l, sw, sl)):
+                cur[i] += v
+        time.sleep(0.3)
+    lines = [f"{heroes[h]}|{heroes[o]}|" + "|".join(str(x) for x in v)
+             for (h, o), v in sorted(agg.items(), key=lambda kv: (heroes[kv[0][0]], heroes[kv[0][1]]))
+             if v[0] >= MIN_LANE_MATCHES and v[1] + v[2] + v[3] <= v[0]]
+    print(f"итоги линии: запросов {calls}, пар {len(agg)}, записано {len(lines)}")
+    if len(lines) < 1500:
+        print("слишком мало пар — lane_matchups.txt не меняю")
+        return
+    day = time.strftime("%Y-%m-%d", time.gmtime())
+    header = [
+        "# Итоги линии по парам героев (STRATZ, рейтинговые матчи последней недели, все ранги).",
+        "# Формат: герой|соперник|линий|выиграно|вничью|проиграно|выиграно всухую|проиграно всухую — с точки зрения первого героя.",
+        "# Файл создаётся автоматически: tools/update_meta.py, раз в неделю (.github/workflows/update-builds.yml).",
+        f"# Пары, где меньше {MIN_LANE_MATCHES} линий, не пишутся. Обновлено {day}. Data provided by STRATZ.",
+    ]
+    with open(os.path.join(RES, "lane_matchups.txt"), "w", encoding="utf-8", newline="\n") as f:
+        f.write("\n".join(header + lines) + "\n")
+    print(f"lane_matchups.txt: {len(lines)} пар")
+    for hk, ok in [("pudge", "lina"), ("lina", "pudge"), ("antimage", "axe")]:
+        for l in lines:
+            if l.startswith(f"{hk}|{ok}|"):
+                print("  пример " + l)
+    bump_version(day)
+
+
 def bump_version(day):
     """Новая dataVersion: установленные программы заберут обновлённые файлы с GitHub (и git увидит изменение)."""
     vp = os.path.join(RES, "data_version.txt")
@@ -635,13 +696,20 @@ def main():
     if not token:
         print("STRATZ_TOKEN не задан — данные STRATZ пропущены, работает старый источник")
         return
+    # в режимах проверки файлы не меняем: update_builds.py уже переписал сборки OpenDota — возвращаем STRATZ из репозитория
     if args.probe:
         probe(token)
+        keep_previous_stratz_builds()
         return
     if args.probe_items:
         probe_items(token)
+        keep_previous_stratz_builds()
         return
     full(token)
+    try:
+        lane_matchups(token)
+    except Exception as e:
+        print(f"итоги линии не получены: {str(e)[:300]}")
 
 
 if __name__ == "__main__":

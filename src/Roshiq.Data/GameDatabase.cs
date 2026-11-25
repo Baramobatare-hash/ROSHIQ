@@ -19,6 +19,19 @@ public sealed record GapRule(string Trait, double Weight, string Ru, string En);
 /// <summary>Совет на линию против героя с признаком Trait.</summary>
 public sealed record LaneTip(string Trait, string Ru, string En);
 
+/// <summary>
+/// Итог линии героя против конкретного соперника по данным STRATZ (lane_matchups.txt, рейтинговые матчи за неделю):
+/// сколько линий выиграно, сыграно вничью и проиграно, из них «всухую» (большой разрыв к 10-й минуте).
+/// </summary>
+public sealed record LaneMatchup(int Matches, int Wins, int Draws, int Losses, int StompWins, int StompLosses)
+{
+    public double WinRate => Matches == 0 ? 0 : (double)Wins / Matches;
+    public double LossRate => Matches == 0 ? 0 : (double)Losses / Matches;
+    public double StompLossRate => Matches == 0 ? 0 : (double)StompLosses / Matches;
+    /// <summary>Перекос линии: выигрыши минус проигрыши, доля от всех линий (−1…1).</summary>
+    public double Edge => Matches == 0 ? 0 : (double)(Wins - Losses) / Matches;
+}
+
 public sealed record TimerRule(string Key, string Ru, string En, int FirstSec, int IntervalSec, int? LastSec, int LeadSec,
     IReadOnlyList<Position>? Positions = null)
 {
@@ -56,6 +69,14 @@ public sealed class GameDatabase
     public IReadOnlyList<TimerRule> Timers { get; private set; } = Array.Empty<TimerRule>();
     /// <summary>0.25: мета по позициям (hero_meta.txt, STRATZ): матчи и победы героя на позиции в группе рангов.</summary>
     public IReadOnlyList<HeroMetaRow> Meta { get; private set; } = Array.Empty<HeroMetaRow>();
+    private readonly Dictionary<(int, int), LaneMatchup> _laneMatchups = new();
+    /// <summary>Сколько пар героев есть в lane_matchups.txt.</summary>
+    public int LaneMatchupCount => _laneMatchups.Count;
+
+    /// <summary>Итог линии героя heroId против соперника opponentId (STRATZ), null — данных нет.</summary>
+    public LaneMatchup? LaneVs(int heroId, int opponentId) =>
+        _laneMatchups.TryGetValue((heroId, opponentId), out var m) ? m : null;
+
     /// <summary>Советы на линию по признакам соперника (lane_tips.txt), в порядке важности.</summary>
     public IReadOnlyList<LaneTip> LaneTips { get; private set; } = Array.Empty<LaneTip>();
     public IReadOnlyDictionary<string, string> VersionInfo { get; private set; } = new Dictionary<string, string>();
@@ -252,6 +273,16 @@ public sealed class GameDatabase
             meta.Add(new HeroMetaRow(_byKey[f[0]].Key, mp, f[2], mm, mw));
         }
         Meta = meta;
+
+        _laneMatchups.Clear();
+        foreach (var f in src.Rows("lane_matchups.txt", 8))
+        {
+            var n = new int[6];
+            if (!_byKey.TryGetValue(f[0], out var h1) || !_byKey.TryGetValue(f[1], out var h2)
+                || Enumerable.Range(0, 6).Any(i => !int.TryParse(f[2 + i], out n[i]) || n[i] < 0) || n[0] == 0 || n[1] + n[2] + n[3] > n[0])
+            { warnings.Add($"lane_matchups.txt: неверная строка {f[0]}|{f[1]}"); continue; }
+            _laneMatchups[(h1.Id, h2.Id)] = new LaneMatchup(n[0], n[1], n[2], n[3], n[4], n[5]);
+        }
 
         var timers = new List<TimerRule>();
         foreach (var f in src.Rows("timers.txt", 7))

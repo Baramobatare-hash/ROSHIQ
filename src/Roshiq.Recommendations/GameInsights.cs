@@ -7,8 +7,32 @@ using Roshiq.Data;
 namespace Roshiq.Recommendations;
 
 /// <summary>Совет на линию против одного соперника: общие советы по его признакам + ваш личный опыт против него.</summary>
-public sealed record LaneOpponentAdvice(Hero Hero, IReadOnlyList<LaneTip> Tips, int? GamesAgainst, double? WinRateAgainst)
+public sealed record LaneOpponentAdvice(Hero Hero, IReadOnlyList<LaneTip> Tips, int? GamesAgainst, double? WinRateAgainst,
+    LaneMatchup? Lane = null)
 {
+    /// <summary>
+    /// Статистика линии против этого героя (STRATZ): «линию выигрывают 46%, проигрывают 38%». Если его часто проигрывают
+    /// всухую — отдельное предупреждение. Пусто, если данных мало.
+    /// </summary>
+    public string LaneLine(Language lang)
+    {
+        if (Lane is not { Matches: >= LaneAdvisor.MinLaneMatches } m) return "";
+        int w = (int)Math.Round(m.WinRate * 100), l = (int)Math.Round(m.LossRate * 100);
+        var text = lang == Language.English
+            ? $"Lane vs him: won {w}%, lost {l}% (STRATZ, {m.Matches:N0} games)."
+            : $"Линию против него выигрывают {w}%, проигрывают {l}% (STRATZ, {m.Matches:N0} игр).";
+        if (m.Edge <= -0.08)
+            text += lang == Language.English ? " Tough lane — play safe near your tower and don't trade first."
+                : " Тяжёлая линия — играй от своей вышки и не начинай размены первым.";
+        else if (m.Edge >= 0.08)
+            text += lang == Language.English ? " Your lane — pressure him and take his last hits."
+                : " Линия в твою пользу — дави и мешай ему добивать.";
+        if (m.StompLossRate >= 0.2)
+            text += lang == Language.English ? $" Lost badly in {m.StompLossRate:P0} of games."
+                : $" В {m.StompLossRate:P0} игр линию против него проигрывают всухую.";
+        return text;
+    }
+
     public string Personal(Language lang) => GamesAgainst is int g && WinRateAgainst is double wr
         ? lang == Language.English ? $"you win {wr:P0} of {g} games against him" : $"против него у вас {wr:P0} побед за {g} игр"
         : "";
@@ -18,9 +42,12 @@ public sealed record LaneOpponentAdvice(Hero Hero, IReadOnlyList<LaneTip> Tips, 
 public static class LaneAdvisor
 {
     public const int TipsPerHero = 2;
+    /// <summary>Меньше игр в паре — статистику линии не показываем: слишком шумно.</summary>
+    public const int MinLaneMatches = 150;
 
+    /// <param name="lane">Итог линии вашего героя против соперника (STRATZ) или null, если герой ещё не выбран.</param>
     public static IReadOnlyList<LaneOpponentAdvice> Advise(IEnumerable<Hero> laneOpponents, IReadOnlyList<LaneTip> rules,
-        IReadOnlyDictionary<int, (int Games, int Wins)>? against = null, int minGames = 5)
+        IReadOnlyDictionary<int, (int Games, int Wins)>? against = null, int minGames = 5, Func<Hero, LaneMatchup?>? lane = null)
     {
         var result = new List<LaneOpponentAdvice>();
         foreach (var h in laneOpponents)
@@ -33,7 +60,8 @@ public static class LaneAdvisor
                 games = a.Games;
                 wr = (double)a.Wins / a.Games;
             }
-            if (tips.Count > 0 || games != null) result.Add(new LaneOpponentAdvice(h, tips, games, wr));
+            var stat = lane?.Invoke(h) is { Matches: >= MinLaneMatches } s ? s : null;
+            if (tips.Count > 0 || games != null || stat != null) result.Add(new LaneOpponentAdvice(h, tips, games, wr, stat));
         }
         return result;
     }
