@@ -6,8 +6,12 @@ internal static class StringsExtra
     public static readonly IReadOnlyDictionary<string, (string Ru, string En)> Table = new Dictionary<string, (string, string)>
     {
         // ---------- раздел «История»
-        ["sec_history"] = ("История", "History"),
-        ["sec_history_sub"] = ("Ваши матчи, разбор после игры и статистика", "Your matches, post-game review and stats"),
+        ["sec_history"] = ("Профиль", "Profile"),
+        ["sec_history_sub"] = ("Ваш профиль, примерный рейтинг, матчи и разбор после игры", "Your profile, estimated rank, matches and post-game review"),
+        ["dash_profile_open"] = ("Открыть профиль", "Open profile"),
+        ["profile_refresh"] = ("Обновить", "Refresh"),
+        ["profile_refreshing"] = ("Обновляю…", "Refreshing…"),
+        ["profile_steam_settings"] = ("Настройки Steam", "Steam settings"),
         ["hist_matches"] = ("Матчи", "Matches"),
         ["hist_count"] = ("Записано матчей: {0}", "Matches recorded: {0}"),
         ["hist_empty_short"] = ("Пока нет матчей", "No matches yet"),

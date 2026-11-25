@@ -38,7 +38,8 @@ public partial class HistoryView : UserControl, IRefreshable
     {
         InitializeComponent();
         Instance = this;
-        Loaded += (_, _) => { if (PendingTab is { } tab) { PendingTab = null; SelectTab(tab); } };
+        Loaded += (_, _) => { if (PendingTab is { } tab) { PendingTab = null; SelectTab(tab); } RefreshProfileHeader(); };
+        ProfileHeader.Large = true;
         Ui.HeroTemplate(MatchList);
         Ui.HeroTemplate(CompareHero);
         App.Host.History.Changed += (_, _) => RequestRefresh();
@@ -48,10 +49,30 @@ public partial class HistoryView : UserControl, IRefreshable
             FillCompareHeroes();
             if (_selected?.MatchId == id && !_reviewBusy) ShowMatch(_selected);
         });
-        App.Host.SteamChanged += (_, _) => Dispatcher.InvokeAsync(() => { if (IsLoaded) ShowPatterns(_all); });
+        App.Host.SteamChanged += (_, _) => Dispatcher.InvokeAsync(() => { if (IsLoaded) { ShowPatterns(_all); RefreshProfileHeader(); } });
+        App.Host.Settings.Changed += (_, _) => Dispatcher.InvokeAsync(() => { if (IsLoaded) RefreshProfileHeader(); });
         App.Host.Goals.Changed += (_, _) => Dispatcher.InvokeAsync(() => { if (IsLoaded) ShowGoals(); });
         Loc.Instance.PropertyChanged += (_, _) => { _listKey = null; RequestRefresh(); };
     }
+
+    private void RefreshProfileHeader()
+    {
+        var L = Loc.Instance;
+        ProfileHeader.Refresh();
+        ProfileRefreshButton.Content = L.Get("profile_refresh").ToUpperInvariant();
+        ProfileRefreshButton.Visibility = ProfileHeader.Linked ? Visibility.Visible : Visibility.Collapsed;
+        ProfileSteamButton.Content = L.Get(ProfileHeader.Linked ? "profile_steam_settings" : "dash_steam_link_btn").ToUpperInvariant();
+    }
+
+    private async void ProfileRefresh_Click(object sender, RoutedEventArgs e)
+    {
+        ProfileRefreshButton.IsEnabled = false;
+        ProfileStatus.Text = Loc.T("profile_refreshing");
+        try { ProfileStatus.Text = await App.Host.RefreshSteamProfileAsync() ?? Loc.T("steam_refreshed"); }
+        finally { ProfileRefreshButton.IsEnabled = true; RefreshProfileHeader(); }
+    }
+
+    private void ProfileSteam_Click(object sender, RoutedEventArgs e) => MainWindow.Navigate("settings");
 
     /// <summary>Обновить при ближайшем простое; повторные запросы до этого момента склеиваются в один.</summary>
     private void RequestRefresh()

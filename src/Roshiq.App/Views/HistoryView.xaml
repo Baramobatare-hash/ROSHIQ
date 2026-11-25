@@ -6,6 +6,17 @@
              xmlns:ov="clr-namespace:Roshiq.Overlay;assembly=Roshiq.Overlay">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="0,0,6,20">
+            <!-- Профиль: ник, медаль, примерный рейтинг с графиком, помощник на калибровку -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" VerticalAlignment="Top" Margin="16,0,0,0">
+                        <Button x:Name="ProfileRefreshButton" Style="{StaticResource GhostButton}" HorizontalAlignment="Right" Click="ProfileRefresh_Click" />
+                        <Button x:Name="ProfileSteamButton" Style="{StaticResource GhostButton}" HorizontalAlignment="Right" Click="ProfileSteam_Click" />
+                        <TextBlock x:Name="ProfileStatus" Style="{StaticResource MutedText}" HorizontalAlignment="Right" TextWrapping="Wrap" MaxWidth="220" TextAlignment="Right" />
+                    </StackPanel>
+                    <v:ProfileSummary x:Name="ProfileHeader" />
+                </DockPanel>
+            </Border>
             <!-- Вкладки раздела: матчи и разбор / прогресс / импорт -->
             <WrapPanel Margin="0,0,0,14">
                 <RadioButton x:Name="TabMatches" Style="{StaticResource Segment}" GroupName="HistTabs" IsChecked="True" Content="{app:T hist_tab_matches}" Checked="Tab_Checked" Margin="0,0,8,0" />

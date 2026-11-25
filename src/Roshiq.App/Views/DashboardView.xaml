@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:app="clr-namespace:Roshiq.App"
+             xmlns:v="clr-namespace:Roshiq.App.Views"
              xmlns:ov="clr-namespace:Roshiq.Overlay;assembly=Roshiq.Overlay">
     <UserControl.Resources>
         <Style x:Key="StatusPill" TargetType="Border">
@@ -193,26 +194,10 @@
                     </Border>
 
                     <!-- Профиль Steam -->
-                    <Border x:Name="ProfileCard" Style="{StaticResource Cell}" BorderThickness="0" Padding="20,18,0,22">
+                    <Border x:Name="ProfileCard" Style="{StaticResource Cell}" BorderThickness="0" Padding="20,18,0,22" Cursor="Hand" Background="Transparent" MouseLeftButtonUp="ProfileCard_MouseUp">
                         <StackPanel>
                             <TextBlock Text="{app:T cell_profile}" Style="{StaticResource CellTitle}" />
-                            <DockPanel>
-                                <Border x:Name="ProfileAvatar" DockPanel.Dock="Left" Width="40" Height="40" CornerRadius="3" Margin="0,0,12,0"
-                                        Background="{DynamicResource Panel3}" VerticalAlignment="Top">
-                                    <ov:Icon x:Name="ProfileAvatarIcon" Glyph="{StaticResource I.Shield}" Size="16" Brush="{DynamicResource Faint}"
-                                             HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                                <StackPanel>
-                                    <TextBlock x:Name="ProfileName" Style="{StaticResource Value}" FontWeight="Bold" />
-                                    <TextBlock x:Name="ProfileSub" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                    <TextBlock x:Name="ProfileRank" Style="{StaticResource MutedText}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,2,0,0" />
-                                    <Grid x:Name="ProfileRankChartBox" Height="38" Margin="0,6,12,0" Visibility="Collapsed" Background="Transparent">
-                                        <Canvas x:Name="ProfileRankChart" ClipToBounds="False" SizeChanged="ProfileRankChart_SizeChanged" />
-                                    </Grid>
-                                    <TextBlock x:Name="ProfileCalib" Style="{StaticResource MutedText}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,2,0,0" />
-                                    <TextBlock x:Name="ProfileWeak" Style="{StaticResource MutedText}" Foreground="{DynamicResource Warning}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,2,0,0" />
-                                </StackPanel>
-                            </DockPanel>
+                            <v:ProfileSummary x:Name="ProfileSummary" />
                             <Button x:Name="ProfileButton" Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Margin="-10,6,0,0" Click="ProfileOpen_Click" />
                         </StackPanel>
                     </Border>
