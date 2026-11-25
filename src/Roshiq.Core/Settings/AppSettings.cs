@@ -269,6 +269,8 @@ public sealed class DataSettings
     public int? EstimatedRankPrevHigh { get; set; }
     /// <summary>История оценки по окнам из 20 рейтинговых матчей (от старых к новым), вилка упакована: 25 и 31 → 2531.</summary>
     public List<int>? EstimatedRankHistory { get; set; }
+    /// <summary>Средняя ступень по последним рейтинговым матчам (Рекрут 1 = 0 … Титан = 35) — для «сколько до следующего ранга».</summary>
+    public double? EstimatedRankMean { get; set; }
     /// <summary>Видит ли OpenDota ваши матчи (null — неизвестно). false — в Dota 2 выключена общедоступная история матчей.</summary>
     public bool? PublicMatchData { get; set; }
     /// <summary>Учитывать вашу статистику на героях в советах драфта.</summary>

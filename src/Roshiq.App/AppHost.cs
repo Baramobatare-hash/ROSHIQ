@@ -1197,7 +1197,7 @@ public sealed class AppHost : IDisposable
         var d = Settings.Current.Data;
         // примерного рейтинга ещё нет (первый запуск после обновления или мало матчей) — проверяем чаще, но не чаще раза в 10 минут
         var profileAge = d.ProfileCheckedUtc is DateTime checkedUtc ? DateTime.UtcNow - checkedUtc : TimeSpan.MaxValue;
-        if (d.SteamAccountId != null && (profileAge > TimeSpan.FromHours(12) || ((d.EstimatedRankMatches == null || d.EstimatedRankHistory == null) && profileAge > TimeSpan.FromMinutes(10))))
+        if (d.SteamAccountId != null && (profileAge > TimeSpan.FromHours(12) || ((d.EstimatedRankMatches == null || d.EstimatedRankHistory == null || d.EstimatedRankMean == null) && profileAge > TimeSpan.FromMinutes(10))))
             await RefreshSteamProfileAsync();
         await AutoImportOnceAsync(null);
     }
@@ -1271,6 +1271,7 @@ public sealed class AppHost : IDisposable
         s.Data.EstimatedRankPrevLow = null;
         s.Data.EstimatedRankPrevHigh = null;
         s.Data.EstimatedRankHistory = null;
+        s.Data.EstimatedRankMean = null;
     }
 
     /// <summary>Обновить ник, аватар, медаль, примерный рейтинг и статистику по героям из OpenDota. Возвращает текст ошибки или null.</summary>
@@ -1319,6 +1320,7 @@ public sealed class AppHost : IDisposable
                         s.Data.EstimatedRankHigh = estimate.High;
                         s.Data.EstimatedRankMatches = estimate.Matches;
                         s.Data.EstimatedRankSolo = estimate.SoloOnly;
+                        s.Data.EstimatedRankMean = double.IsNaN(estimate.Mean) ? null : Math.Round(estimate.Mean, 3);
                         s.Data.EstimatedRankPrevLow = previous?.Low;
                         s.Data.EstimatedRankPrevHigh = previous?.High;
                         s.Data.EstimatedRankHistory = history.Count >= 3 ? history.Select(RankEstimator.Pack).ToList() : null;

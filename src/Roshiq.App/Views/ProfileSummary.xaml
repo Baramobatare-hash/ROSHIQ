@@ -12,7 +12,7 @@
             <TextBlock x:Name="ProfileName" Style="{StaticResource Value}" FontWeight="Bold" />
             <TextBlock x:Name="ProfileSub" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
             <TextBlock x:Name="ProfileRank" Style="{StaticResource MutedText}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,2,0,0" />
-            <Grid x:Name="ProfileRankChartBox" Height="38" Margin="0,6,12,0" Visibility="Collapsed" Background="Transparent">
+            <Grid x:Name="ProfileRankChartBox" Height="64" Margin="0,6,12,0" Visibility="Collapsed" Background="Transparent">
                 <Canvas x:Name="ProfileRankChart" ClipToBounds="False" SizeChanged="ProfileRankChart_SizeChanged" />
             </Grid>
             <TextBlock x:Name="ProfileCalib" Style="{StaticResource MutedText}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,2,0,0" />

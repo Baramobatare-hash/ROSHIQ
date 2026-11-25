@@ -171,7 +171,7 @@ public static class Ranks
 }
 
 /// <summary>Примерный рейтинг по соперникам: вилка медалей (rank_tier) и сколько матчей в основе.</summary>
-public sealed record RankEstimate(int Low, int High, int Matches, bool SoloOnly);
+public sealed record RankEstimate(int Low, int High, int Matches, bool SoloOnly, double Mean = double.NaN);
 
 /// <summary>
 /// Оценка рейтинга до калибровки (или в дополнение к медали): игра подбирает матчи по скрытому рейтингу,
@@ -205,7 +205,9 @@ public static class RankEstimator
         if (used.Count < MinMatches) return null;
         var steps = used.Select(m => ToStep(m.AverageRank)).OrderBy(x => x).ToList();
         int Pct(double p) => steps[(int)Math.Round(p * (steps.Count - 1))];
-        return new RankEstimate(FromStep(Pct(0.25)), FromStep(Pct(0.75)), used.Count, soloOnly);
+        // средняя ступень (с дробной частью) — по ней видно, сколько осталось до следующего ранга
+        double mean = steps.Average();
+        return new RankEstimate(FromStep(Pct(0.25)), FromStep(Pct(0.75)), used.Count, soloOnly, mean);
     }
 
     /// <summary>
@@ -225,6 +227,18 @@ public static class RankEstimator
     /// <summary>Упаковка вилки в одно число для настроек: 25 и 31 → 2531.</summary>
     public static int Pack(RankEstimate e) => e.Low * 100 + e.High;
     public static (int Low, int High) Unpack(int v) => (v / 100, v % 100);
+
+    /// <summary>
+    /// Где вы внутри ранга: текущий ранг (rank_tier), следующий и сколько пройдено до него (0…1) по средней ступени.
+    /// У Титана следующего нет — прогресс 1.
+    /// </summary>
+    public static (int Current, int? Next, double Progress) Progress(double meanStep)
+    {
+        meanStep = Math.Clamp(meanStep, 0, 35);
+        int cur = (int)Math.Floor(meanStep);
+        if (cur >= 35) return (80, null, 1);
+        return (FromStep(cur), FromStep(cur + 1), meanStep - cur);
+    }
 
     /// <summary>Середина вилки в ступенях — для сравнения «было / стало».</summary>
     public static double Mid(int low, int high) => (ToStep(low) + ToStep(high)) / 2.0;

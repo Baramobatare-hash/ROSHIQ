@@ -129,4 +129,18 @@ public class RankEstimateTests
         Assert.Equal(70, role.Value.Games);
         Assert.Null(RankEstimator.BestRole(stats.Take(1), id => pos[id], now));
     }
+
+    [Fact]
+    public void Progress_ToNextRank()
+    {
+        // 15 соло: 1× Страж 4 (8), 7× Страж 5 (9), 7× Рыцарь 1 (10) → средняя 9.4
+        var rows = new (int, int)[] { (24, 1) }.Concat(Enumerable.Repeat((25, 1), 7)).Concat(Enumerable.Repeat((31, 1), 7)).ToList();
+        var e = RankEstimator.Estimate(rows)!;
+        Assert.Equal(9.4, e.Mean, 3);
+        var (cur, next, p) = RankEstimator.Progress(e.Mean);
+        Assert.Equal(25, cur);          // Страж 5
+        Assert.Equal(31, next);         // следующий — Рыцарь 1
+        Assert.Equal(0.4, p, 3);        // 40% пути
+        Assert.Equal((80, (int?)null, 1.0), RankEstimator.Progress(35));
+    }
 }
