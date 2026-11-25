@@ -208,6 +208,24 @@ public static class RankEstimator
         return new RankEstimate(FromStep(Pct(0.25)), FromStep(Pct(0.75)), used.Count, soloOnly);
     }
 
+    /// <summary>
+    /// История по матчам: оценка по окнам из <paramref name="window"/> рейтинговых матчей со сдвигом <paramref name="step"/>,
+    /// от старых к новым. Хранить ничего не нужно — график виден сразу после первой загрузки.
+    /// </summary>
+    public static IReadOnlyList<RankEstimate> History(IReadOnlyList<(int AverageRank, int PartySize)> matches, int window = 20, int step = 10)
+    {
+        int n = matches.Count(m => m.AverageRank >= 10);
+        var list = new List<RankEstimate>();
+        for (int skip = 0; skip + window <= n; skip += step)
+            if (Estimate(matches, window, skip) is { } e) list.Add(e);
+        list.Reverse();
+        return list;
+    }
+
+    /// <summary>Упаковка вилки в одно число для настроек: 25 и 31 → 2531.</summary>
+    public static int Pack(RankEstimate e) => e.Low * 100 + e.High;
+    public static (int Low, int High) Unpack(int v) => (v / 100, v % 100);
+
     /// <summary>Середина вилки в ступенях — для сравнения «было / стало».</summary>
     public static double Mid(int low, int high) => (ToStep(low) + ToStep(high)) / 2.0;
 
@@ -233,6 +251,52 @@ public static class RankEstimator
             .Take(take)
             .Select(x => x.Stat)
             .ToList();
+    }
+
+    /// <summary>
+    /// Кого лучше не брать на калибровку: от 10 игр за последний год, и даже верхняя граница интервала Уилсона ниже 45% —
+    /// то есть проигрыши на герое не случайность.
+    /// </summary>
+    public static IReadOnlyList<PlayerHeroStat> AvoidHeroes(IEnumerable<PlayerHeroStat> stats, DateTime nowUtc, int take = 2)
+    {
+        long since = new DateTimeOffset(nowUtc.AddDays(-365)).ToUnixTimeSeconds();
+        return stats
+            .Where(s => s.Games >= 10 && s.LastPlayed >= since)
+            .Select(s => (Stat: s, Upper: WilsonUpper(s.Wins, s.Games)))
+            .Where(x => x.Upper < 0.45)
+            .OrderBy(x => x.Upper)
+            .Take(take)
+            .Select(x => x.Stat)
+            .ToList();
+    }
+
+    /// <summary>Группа роли по типичной позиции героя: 1, 2, 3 или 4 (саппорты 4 и 5 вместе).</summary>
+    public static int RoleGroup(Position p) => p is Position.SoftSupport or Position.HardSupport ? 4 : (int)p;
+
+    /// <summary>
+    /// Лучшая роль по вашим героям: каждого героя относим к его самой типичной позиции, складываем игры и победы
+    /// за последний год. Нужны хотя бы две роли от 20 игр; лучшая — по нижней границе Уилсона и не ниже 45%.
+    /// </summary>
+    public static (int Group, int Games, double WinRate)? BestRole(IEnumerable<PlayerHeroStat> stats, Func<int, Position?> mainPosition, DateTime nowUtc)
+    {
+        long since = new DateTimeOffset(nowUtc.AddDays(-365)).ToUnixTimeSeconds();
+        var groups = stats
+            .Where(s => s.Games > 0 && s.LastPlayed >= since && mainPosition(s.HeroId) is not null)
+            .GroupBy(s => RoleGroup(mainPosition(s.HeroId)!.Value))
+            .Select(g => (Group: g.Key, Games: g.Sum(x => x.Games), Wins: g.Sum(x => x.Wins)))
+            .Where(g => g.Games >= 20)
+            .ToList();
+        if (groups.Count < 2) return null;
+        var best = groups.OrderByDescending(g => Wilson(g.Wins, g.Games)).First();
+        if (Wilson(best.Wins, best.Games) < 0.45) return null;
+        return (best.Group, best.Games, (double)best.Wins / best.Games);
+    }
+
+    public static double WilsonUpper(int wins, int games, double z = 1.64)
+    {
+        if (games <= 0) return 1;
+        double p = (double)wins / games, z2 = z * z;
+        return (p + z2 / (2 * games) + z * Math.Sqrt((p * (1 - p) + z2 / (4 * games)) / games)) / (1 + z2 / games);
     }
 
     public static double Wilson(int wins, int games, double z = 1.64)

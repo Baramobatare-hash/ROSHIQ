@@ -109,6 +109,7 @@ public partial class DashboardView : UserControl, IRefreshable
             ProfileButton.Content = L.Get("dash_steam_link_btn").ToUpperInvariant();
             ProfileWeak.Visibility = Visibility.Collapsed;
             ProfileRank.Visibility = Visibility.Collapsed;
+            ProfileRankChartBox.Visibility = Visibility.Collapsed;
             ProfileCalib.Visibility = Visibility.Collapsed;
             SetProfileAvatar(null);
             return;
@@ -161,6 +162,7 @@ public partial class DashboardView : UserControl, IRefreshable
                 ? Visibility.Visible : Visibility.Collapsed;
             ProfileRank.Foreground = Ui.Res("Muted");
             ProfileRank.ToolTip = null;
+            SetRankChart(null, L);
             return;
         }
         var range = Roshiq.Data.RankEstimator.Range(new Roshiq.Data.RankEstimate(lo, hi, n, d.EstimatedRankSolo), L.Language);
@@ -177,6 +179,57 @@ public partial class DashboardView : UserControl, IRefreshable
         ProfileRank.Foreground = Ui.Res(calibrated ? "Muted" : "Text");
         ProfileRank.ToolTip = L.Get(d.EstimatedRankSolo ? "dash_rank_estimate_tip" : "dash_rank_estimate_tip_party");
         ProfileRank.Visibility = Visibility.Visible;
+        SetRankChart(d.EstimatedRankHistory, L);
+    }
+
+    private List<(int Low, int High)> _rankChart = new();
+    private string _rankChartKey = "";
+
+    /// <summary>График оценки по окнам из 20 рейтинговых матчей: линия по середине вилки, полоса — сама вилка.</summary>
+    private void SetRankChart(List<int>? history, Loc L)
+    {
+        var points = history?.Select(Roshiq.Data.RankEstimator.Unpack).ToList() ?? new();
+        if (points.Count < 3) { ProfileRankChartBox.Visibility = Visibility.Collapsed; _rankChartKey = ""; return; }
+        var key = string.Join(",", history!) + L.Language;
+        ProfileRankChartBox.Visibility = Visibility.Visible;
+        if (key == _rankChartKey) return;
+        _rankChartKey = key;
+        _rankChart = points;
+        var first = Roshiq.Data.RankEstimator.Range(new Roshiq.Data.RankEstimate(points[0].Low, points[0].High, 0, false), L.Language);
+        var last = Roshiq.Data.RankEstimator.Range(new Roshiq.Data.RankEstimate(points[^1].Low, points[^1].High, 0, false), L.Language);
+        ProfileRankChartBox.ToolTip = L.Format("dash_rank_chart_tip", points.Count * 10 + 10, first, last);
+        DrawRankChart();
+    }
+
+    private void ProfileRankChart_SizeChanged(object sender, SizeChangedEventArgs e) => DrawRankChart();
+
+    private void DrawRankChart()
+    {
+        var c = ProfileRankChart;
+        c.Children.Clear();
+        double w = c.ActualWidth, h = c.ActualHeight;
+        if (_rankChart.Count < 3 || w < 20 || h < 10) return;
+        var steps = _rankChart.Select(p => (Lo: (double)Roshiq.Data.RankEstimator.ToStep(p.Low), Hi: (double)Roshiq.Data.RankEstimator.ToStep(p.High))).ToList();
+        double min = steps.Min(s => s.Lo), max = steps.Max(s => s.Hi);
+        if (max - min < 4) { double mid = (max + min) / 2; min = mid - 2; max = mid + 2; }
+        const double pad = 4;
+        double X(int i) => pad + i * (w - 2 * pad) / (steps.Count - 1);
+        double Y(double s) => pad + (max - s) * (h - 2 * pad) / (max - min);
+        var accent = Ui.Res("Accent");
+        // полоса вилки
+        var band = new System.Windows.Shapes.Polygon { Fill = accent, Opacity = 0.32 };
+        for (int i = 0; i < steps.Count; i++) band.Points.Add(new Point(X(i), Y(steps[i].Hi)));
+        for (int i = steps.Count - 1; i >= 0; i--) band.Points.Add(new Point(X(i), Y(steps[i].Lo)));
+        c.Children.Add(band);
+        // линия середины
+        var line = new System.Windows.Shapes.Polyline { Stroke = accent, StrokeThickness = 2, StrokeLineJoin = System.Windows.Media.PenLineJoin.Round };
+        for (int i = 0; i < steps.Count; i++) line.Points.Add(new Point(X(i), Y((steps[i].Lo + steps[i].Hi) / 2)));
+        c.Children.Add(line);
+        // последняя точка — сейчас
+        var dot = new System.Windows.Shapes.Ellipse { Width = 7, Height = 7, Fill = accent };
+        Canvas.SetLeft(dot, X(steps.Count - 1) - 3.5);
+        Canvas.SetTop(dot, Y((steps[^1].Lo + steps[^1].Hi) / 2) - 3.5);
+        c.Children.Add(dot);
     }
 
     /// <summary>Без медали — герои, на которых у вас лучший надёжный винрейт: их и стоит брать на калибровку.</summary>
@@ -185,13 +238,23 @@ public partial class DashboardView : UserControl, IRefreshable
         bool calibrated = Roshiq.Data.Ranks.Name(d.RankTier, d.LeaderboardRank, L.Language) != null;
         var heroes = calibrated ? Array.Empty<Roshiq.Data.PlayerHeroStat>()
             : Roshiq.Data.RankEstimator.CalibrationHeroes(App.Host.PlayerHeroes.All.Values, DateTime.UtcNow);
-        var names = heroes
+        string? Line(IEnumerable<Roshiq.Data.PlayerHeroStat> list) => list
             .Select(s => App.Host.Database.FindHero(s.HeroId) is { } h
                 ? L.Format("dash_calib_hero", h.DisplayName(L.Language), s.WinRate, s.Games) : null)
             .Where(x => x != null)
-            .ToList();
-        if (names.Count == 0) { ProfileCalib.Visibility = Visibility.Collapsed; return; }
-        ProfileCalib.Text = L.Format("dash_calib", string.Join(", ", names));
+            .ToList() is { Count: > 0 } names ? string.Join(", ", names) : null;
+        var lines = new List<string>();
+        if (Line(heroes) is string best) lines.Add(L.Format("dash_calib", best));
+        if (!calibrated)
+        {
+            var all = App.Host.PlayerHeroes.All.Values;
+            if (Roshiq.Data.RankEstimator.BestRole(all, id => App.Host.Database.FindHero(id)?.Positions.FirstOrDefault() is Position p && p != 0 ? p : null, DateTime.UtcNow) is { } role)
+                lines.Add(L.Format("dash_calib_role", L.Get("calib_role_" + role.Group), role.WinRate, role.Games));
+            if (Line(Roshiq.Data.RankEstimator.AvoidHeroes(all, DateTime.UtcNow)) is string avoid)
+                lines.Add(L.Format("dash_calib_avoid", avoid));
+        }
+        if (lines.Count == 0) { ProfileCalib.Visibility = Visibility.Collapsed; return; }
+        ProfileCalib.Text = string.Join("\n", lines);
         ProfileCalib.ToolTip = L.Get("dash_calib_tip");
         ProfileCalib.Visibility = Visibility.Visible;
     }

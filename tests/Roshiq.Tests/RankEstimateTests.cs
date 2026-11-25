@@ -83,4 +83,50 @@ public class RankEstimateTests
         var picks = RankEstimator.CalibrationHeroes(stats, now);
         Assert.Equal(new[] { 2, 1 }, picks.Select(p => p.HeroId).ToArray());
     }
+
+    [Fact]
+    public void History_GoesFromOldToNew()
+    {
+        // 50 матчей, новые первыми: свежие 20 — Рыцарь 1, остальные — Страж 2
+        var rows = Enumerable.Repeat((31, 1), 20).Concat(Enumerable.Repeat((22, 1), 30)).ToList();
+        var h = RankEstimator.History(rows);
+        Assert.Equal(4, h.Count);                 // окна: 0–19, 10–29, 20–39, 30–49
+        Assert.Equal(22, h[0].Low);               // самое старое
+        Assert.Equal(31, h[^1].Low);              // самое новое
+        Assert.Equal((25, 31), RankEstimator.Unpack(RankEstimator.Pack(new RankEstimate(25, 31, 20, true))));
+    }
+
+    [Fact]
+    public void AvoidHeroes_OnlyReliableLosses()
+    {
+        var now = new DateTime(2026, 11, 25, 0, 0, 0, DateTimeKind.Utc);
+        long recent = new DateTimeOffset(now.AddDays(-5)).ToUnixTimeSeconds();
+        var stats = new[]
+        {
+            new PlayerHeroStat(1, 40, 10, recent),  // 25% на 40 играх — не брать
+            new PlayerHeroStat(2, 10, 3, recent),   // 30% на 10 играх — может быть случайностью
+            new PlayerHeroStat(3, 50, 25, recent),  // 50% — нормально
+        };
+        Assert.Equal(new[] { 1 }, RankEstimator.AvoidHeroes(stats, now).Select(s => s.HeroId).ToArray());
+    }
+
+    [Fact]
+    public void BestRole_GroupsHeroesByMainPosition()
+    {
+        var now = new DateTime(2026, 11, 25, 0, 0, 0, DateTimeKind.Utc);
+        long recent = new DateTimeOffset(now.AddDays(-5)).ToUnixTimeSeconds();
+        var pos = new Dictionary<int, Position> { [1] = Position.Carry, [2] = Position.HardSupport, [3] = Position.SoftSupport, [4] = Position.Mid };
+        var stats = new[]
+        {
+            new PlayerHeroStat(1, 60, 27, recent),  // керри 45%
+            new PlayerHeroStat(2, 30, 19, recent),  // саппорты 4 и 5 вместе: 70 игр, 44 победы — 63%
+            new PlayerHeroStat(3, 40, 25, recent),
+            new PlayerHeroStat(4, 5, 5, recent),    // мид — мало игр, не считается
+        };
+        var role = RankEstimator.BestRole(stats, id => pos.TryGetValue(id, out var p) ? p : null, now);
+        Assert.NotNull(role);
+        Assert.Equal(4, role!.Value.Group);
+        Assert.Equal(70, role.Value.Games);
+        Assert.Null(RankEstimator.BestRole(stats.Take(1), id => pos[id], now));
+    }
 }
