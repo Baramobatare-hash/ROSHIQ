@@ -145,6 +145,7 @@ public partial class HistoryView : UserControl, IRefreshable
         _listKey = key;
         _ready = false;
         var all = _all = App.Host.History.All();
+        WeekReportCard.Refresh(all);
         var keep = PendingSelectId ?? _selected?.Id;
         bool jumpTo = PendingSelectId != null;
         PendingSelectId = null;
@@ -286,16 +287,27 @@ public partial class HistoryView : UserControl, IRefreshable
         if (s.Points.Count < 2 || w < 20 || h < 20) return;
         double min = s.Points.Min(p => p.Value), max = s.Points.Max(p => p.Value);
         if (max - min < 1e-6) { max += 1; min -= 1; }
-        var line = new Polyline { Stroke = Ui.Res("Accent"), StrokeThickness = 1.8, StrokeLineJoin = PenLineJoin.Round };
+        var pts = new List<Point>();
         for (int i = 0; i < s.Points.Count; i++)
         {
-            double x = 6 + (w - 12) * i / (s.Points.Count - 1);
-            double y = 6 + (h - 12) * (1 - (s.Points[i].Value - min) / (max - min));
-            line.Points.Add(new Point(x, y));
+            double x = 8 + (w - 16) * i / (s.Points.Count - 1);
+            double y = 8 + (h - 16) * (1 - (s.Points[i].Value - min) / (max - min));
+            pts.Add(new Point(x, y));
         }
+        var area = ChartKit.Area(pts, h, "Accent", 0.28);
+        canvas.Children.Add(area);
+        var line = ChartKit.Curve(pts, "Accent", 2);
         canvas.Children.Add(line);
+        ChartKit.PulseDot(canvas, pts[^1], "Accent", 6);
         // 0.23.1: линия тренда «рисуется» при первом показе (повторная отрисовка при смене размера — без анимации)
-        if (canvas.Tag is not true) { canvas.Tag = true; Motion.DrawOn(line, 120, 900); }
+        if (canvas.Tag is not true) { canvas.Tag = true; ChartKit.DrawOn(line, 120, 900); ChartKit.FadeIn(area, 400, 700); }
+        var xs = pts.Select(p => p.X).ToList();
+        ChartKit.Hover(canvas, x =>
+        {
+            int i = ChartKit.Nearest(xs, x);
+            var (utc, value) = s.Points[i];
+            return new ChartKit.Probe(xs[i], utc.ToLocalTime().ToString("dd.MM", CultureInfo.InvariantCulture) + "  " + value.ToString("0.#", CultureInfo.InvariantCulture), new[] { (pts[i].Y, "Accent") });
+        });
     }
 
     private void OpenDota_Click(object sender, RoutedEventArgs e)
@@ -640,16 +652,38 @@ public partial class HistoryView : UserControl, IRefreshable
 
         bool animate = _chartAnimatedFor != m.Id;
         _chartAnimatedFor = m.Id;
-        void Series(Func<MatchSample, int?> value, string brush, double thickness)
+        // плавные кривые: XPM — приглушённая, GPM — светящаяся с градиентной заливкой; точка в конце пульсирует
+        List<Point> Series(Func<MatchSample, int?> value) =>
+            pts.Where(s => value(s) is int).Select(s => new Point(X(s.Clock), Y(value(s)!.Value))).ToList();
+        var xpm = Series(s => s.Xpm);
+        var gpm = Series(s => s.Gpm);
+        if (xpm.Count >= 2)
         {
-            var line = new Polyline { Stroke = Ui.Res(brush), StrokeThickness = thickness, StrokeLineJoin = PenLineJoin.Round };
-            foreach (var s in pts)
-                if (value(s) is int v) line.Points.Add(new Point(X(s.Clock), Y(v)));
-            if (line.Points.Count >= 2) Chart.Children.Add(line);
-            if (animate) Motion.DrawOn(line, brush == "Accent" ? 0 : 200, 1000);
+            var xl = ChartKit.Curve(xpm, "Muted", 1.6, glow: false);
+            Chart.Children.Add(xl);
+            if (animate) ChartKit.DrawOn(xl, 250, 1100);
         }
-        Series(s => s.Xpm, "Muted", 1.6);
-        Series(s => s.Gpm, "Accent", 2.2);
+        if (gpm.Count >= 2)
+        {
+            var area = ChartKit.Area(gpm, h - padB, "Accent", 0.32);
+            Chart.Children.Add(area);
+            var gl = ChartKit.Curve(gpm, "Accent", 2.4);
+            Chart.Children.Add(gl);
+            ChartKit.PulseDot(Chart, gpm[^1], "Accent", 7);
+            if (animate) { ChartKit.DrawOn(gl, 0, 1100); ChartKit.FadeIn(area, 400, 900); }
+        }
+        // наведение: минута, GPM и XPM в этой точке
+        var xs = pts.Select(s => X(s.Clock)).ToList();
+        ChartKit.Hover(Chart, x =>
+        {
+            int i = ChartKit.Nearest(xs, x);
+            var s = pts[i];
+            var dots = new List<(double, string)>();
+            var parts = new List<string> { $"{s.Clock / 60}:{s.Clock % 60:00}" };
+            if (s.Gpm is int g) { dots.Add((Y(g), "Accent")); parts.Add("GPM " + g); }
+            if (s.Xpm is int xp) { dots.Add((Y(xp), "Muted")); parts.Add("XPM " + xp); }
+            return new ChartKit.Probe(xs[i], string.Join("   ", parts), dots);
+        });
     }
 
     private void ShowStats(IReadOnlyList<MatchRecord> all)

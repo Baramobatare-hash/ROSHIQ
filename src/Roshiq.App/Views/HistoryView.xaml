@@ -17,6 +17,8 @@
                     <v:ProfileSummary x:Name="ProfileHeader" />
                 </DockPanel>
             </Border>
+            <!-- Итоги недели: игры, винрейт, ошибка недели и неделя по дням -->
+            <v:WeekReport x:Name="WeekReportCard" />
             <!-- Вкладки раздела: матчи и разбор / прогресс / импорт -->
             <WrapPanel Margin="0,0,0,14">
                 <RadioButton x:Name="TabMatches" Style="{StaticResource Segment}" GroupName="HistTabs" IsChecked="True" Content="{app:T hist_tab_matches}" Checked="Tab_Checked" Margin="0,0,8,0" />

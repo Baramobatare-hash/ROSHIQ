@@ -136,41 +136,107 @@ public partial class ProfileSummary : UserControl
         if (key == _rankChartKey) return;
         _rankChartKey = key;
         _rankChart = points;
-        var first = Roshiq.Data.RankEstimator.Range(new Roshiq.Data.RankEstimate(points[0].Low, points[0].High, 0, false), L.Language);
-        var last = Roshiq.Data.RankEstimator.Range(new Roshiq.Data.RankEstimate(points[^1].Low, points[^1].High, 0, false), L.Language);
-        ProfileRankChartBox.ToolTip = L.Format("dash_rank_chart_tip", points.Count * 10 + 10, first, last);
+        _rankAnimate = true;
+        ProfileRankChartBox.ToolTip = null;
         DrawRankChart();
     }
 
     private void ProfileRankChart_SizeChanged(object sender, SizeChangedEventArgs e) => DrawRankChart();
 
+    private bool _rankAnimate;
+    private static readonly string[] TierRu = { "", "Рекрут", "Страж", "Рыцарь", "Герой", "Легенда", "Властелин", "Божество", "Титан" };
+    private static readonly string[] TierEn = { "", "Herald", "Guardian", "Crusader", "Archon", "Legend", "Ancient", "Divine", "Immortal" };
+
+    /// <summary>
+    /// «Лестница медалей»: за графиком — полосы медалей (Страж, Рыцарь…), по ним идёт лента вилки и светящаяся
+    /// линия её середины. Точка «сейчас» пульсирует, при наведении — какие матчи и какая вилка.
+    /// </summary>
     private void DrawRankChart()
     {
         var c = ProfileRankChart;
         c.Children.Clear();
         double w = c.ActualWidth, h = c.ActualHeight;
         if (_rankChart.Count < 3 || w < 20 || h < 10) return;
+        var L = Loc.Instance;
         var steps = _rankChart.Select(p => (Lo: (double)Roshiq.Data.RankEstimator.ToStep(p.Low), Hi: (double)Roshiq.Data.RankEstimator.ToStep(p.High))).ToList();
-        double min = steps.Min(s => s.Lo), max = steps.Max(s => s.Hi);
+        double min = steps.Min(s => s.Lo) - 0.6, max = steps.Max(s => s.Hi) + 0.6;
         if (max - min < 4) { double mid = (max + min) / 2; min = mid - 2; max = mid + 2; }
-        const double pad = 4;
-        double X(int i) => pad + i * (w - 2 * pad) / (steps.Count - 1);
-        double Y(double s) => pad + (max - s) * (h - 2 * pad) / (max - min);
-        var accent = Ui.Res("Accent");
-        // полоса вилки
-        var band = new System.Windows.Shapes.Polygon { Fill = accent, Opacity = 0.32 };
-        for (int i = 0; i < steps.Count; i++) band.Points.Add(new Point(X(i), Y(steps[i].Hi)));
-        for (int i = steps.Count - 1; i >= 0; i--) band.Points.Add(new Point(X(i), Y(steps[i].Lo)));
-        c.Children.Add(band);
-        // линия середины
-        var line = new System.Windows.Shapes.Polyline { Stroke = accent, StrokeThickness = 2, StrokeLineJoin = System.Windows.Media.PenLineJoin.Round };
-        for (int i = 0; i < steps.Count; i++) line.Points.Add(new Point(X(i), Y((steps[i].Lo + steps[i].Hi) / 2)));
+        double padL = _large ? 64 : 4, padR = _large ? 70 : 10, padT = 6, padB = 6;
+        double X(int i) => padL + i * (w - padL - padR) / (steps.Count - 1);
+        double Y(double s) => padT + (max - s) * (h - padT - padB) / (max - min);
+
+        // полосы медалей: каждая медаль — 5 ступеней; чередуем фон и подписываем медаль слева
+        var names = L.Language == Roshiq.Core.Models.Language.English ? TierEn : TierRu;
+        for (int tier = (int)Math.Floor(min / 5); tier * 5 <= max; tier++)
+        {
+            double top = Y(Math.Min(max, tier * 5 + 5 - 0.5)), bottom = Y(Math.Max(min, tier * 5 - 0.5));
+            if (bottom - top < 1) continue;
+            var band = new System.Windows.Shapes.Rectangle
+            {
+                Width = w, Height = bottom - top, IsHitTestVisible = false,
+                Fill = Ui.Res(tier % 2 == 0 ? "Panel2" : "Panel"), Opacity = 0.55,
+            };
+            Canvas.SetTop(band, top);
+            c.Children.Add(band);
+            c.Children.Add(new System.Windows.Shapes.Line
+            {
+                X1 = 0, X2 = w, Y1 = bottom, Y2 = bottom, Stroke = Ui.Res("Line"), StrokeThickness = 1,
+                StrokeDashArray = new System.Windows.Media.DoubleCollection { 2, 4 }, IsHitTestVisible = false,
+            });
+            if (_large && tier + 1 < names.Length && bottom - top >= 14)
+                ChartKit.Label(c, names[Math.Clamp(tier + 1, 1, 8)], 6, (top + bottom) / 2 - 7, "Faint", 10.5, FontWeights.SemiBold);
+        }
+
+        var hiPts = steps.Select((s, i) => new Point(X(i), Y(s.Hi))).ToList();
+        var loPts = steps.Select((s, i) => new Point(X(i), Y(s.Lo))).ToList();
+        var midPts = steps.Select((s, i) => new Point(X(i), Y((s.Lo + s.Hi) / 2))).ToList();
+        var ribbon = ChartKit.Ribbon(hiPts, loPts, "Accent", 0.30);
+        c.Children.Add(ribbon);
+        var area = ChartKit.Area(midPts, h, "Accent", 0.12);
+        c.Children.Add(area);
+        var line = ChartKit.Curve(midPts, "Accent", _large ? 2.6 : 2);
         c.Children.Add(line);
-        // последняя точка — сейчас
-        var dot = new System.Windows.Shapes.Ellipse { Width = 7, Height = 7, Fill = accent };
-        Canvas.SetLeft(dot, X(steps.Count - 1) - 3.5);
-        Canvas.SetTop(dot, Y((steps[^1].Lo + steps[^1].Hi) / 2) - 3.5);
-        c.Children.Add(dot);
+        // засечки окон: маленькие ромбы на линии
+        if (_large)
+            foreach (var p in midPts.Take(midPts.Count - 1))
+            {
+                var pip = new System.Windows.Shapes.Rectangle
+                {
+                    Width = 6, Height = 6, Fill = Ui.Res("Panel"), Stroke = Ui.Res("Accent"), StrokeThickness = 1.5, IsHitTestVisible = false,
+                    RenderTransformOrigin = new Point(0.5, 0.5), RenderTransform = new System.Windows.Media.RotateTransform(45),
+                };
+                Canvas.SetLeft(pip, p.X - 3);
+                Canvas.SetTop(pip, p.Y - 3);
+                c.Children.Add(pip);
+                if (_rankAnimate) ChartKit.FadeIn(pip, 500, 500);
+            }
+        ChartKit.PulseDot(c, midPts[^1], "Accent", _large ? 9 : 7);
+        if (_large)
+        {
+            var now = Roshiq.Data.RankEstimator.Range(new Roshiq.Data.RankEstimate(_rankChart[^1].Low, _rankChart[^1].High, 0, false), L.Language);
+            var label = ChartKit.Label(c, now, w - padR + 12, midPts[^1].Y - 9, "Accent", 11.5, FontWeights.Bold);
+            label.MaxWidth = padR - 14;
+            label.TextWrapping = TextWrapping.Wrap;
+            if (_rankAnimate) ChartKit.FadeIn(label, 900, 500);
+        }
+        if (_rankAnimate)
+        {
+            ChartKit.DrawOn(line, 0, 1100);
+            ChartKit.FadeIn(ribbon, 300, 900);
+            ChartKit.FadeIn(area, 300, 900);
+            _rankAnimate = false;
+        }
+
+        var xs = midPts.Select(p => p.X).ToList();
+        int n = steps.Count;
+        ChartKit.Hover(c, x =>
+        {
+            int i = ChartKit.Nearest(xs, x);
+            int skip = (n - 1 - i) * 10;
+            var range = Roshiq.Data.RankEstimator.Range(new Roshiq.Data.RankEstimate(_rankChart[i].Low, _rankChart[i].High, 0, false), L.Language);
+            var when = i == n - 1 ? L.Get("rank_chart_recent") : L.Format("rank_chart_window", skip + 1, skip + 20);
+            return new ChartKit.Probe(xs[i], when + "\n" + range, new[] { (midPts[i].Y, "Accent") });
+        });
     }
 
     /// <summary>Без медали — герои, на которых у вас лучший надёжный винрейт: их и стоит брать на калибровку.</summary>

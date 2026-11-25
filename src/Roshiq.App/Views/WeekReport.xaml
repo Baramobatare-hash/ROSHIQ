@@ -1,0 +1,32 @@
+<UserControl x:Class="Roshiq.App.Views.WeekReport"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:app="clr-namespace:Roshiq.App">
+    <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="1.25*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Margin="0,0,24,0">
+                <TextBlock Style="{StaticResource Eyebrow}"><Run Text="{app:T wr_title, Upper=True}" /></TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="GamesValue" Style="{StaticResource BigValue}" Text="0" />
+                    <TextBlock x:Name="GamesUnit" Style="{StaticResource MutedText}" VerticalAlignment="Bottom" Margin="6,0,18,8" />
+                    <TextBlock x:Name="WinValue" Style="{StaticResource BigValue}" Text="—" />
+                    <TextBlock x:Name="WinDelta" Style="{StaticResource MutedText}" VerticalAlignment="Bottom" Margin="6,0,0,8" />
+                </StackPanel>
+                <TextBlock x:Name="KdaLine" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                <WrapPanel x:Name="Chips" Margin="0,10,0,0" />
+                <TextBlock Style="{StaticResource Eyebrow}" Margin="0,14,0,0"><Run Text="{app:T week_mistake, Upper=True}" /></TextBlock>
+                <TextBlock x:Name="Mistake" Style="{StaticResource Value}" TextWrapping="Wrap" />
+                <TextBlock x:Name="MistakeSub" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,2,0,0" />
+            </StackPanel>
+            <StackPanel Grid.Column="1">
+                <TextBlock Style="{StaticResource Eyebrow}"><Run Text="{app:T wr_days, Upper=True}" /></TextBlock>
+                <Canvas x:Name="Days" Height="150" ClipToBounds="False" SizeChanged="Days_SizeChanged" />
+                <TextBlock x:Name="DaysNote" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,22,0,0" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>
