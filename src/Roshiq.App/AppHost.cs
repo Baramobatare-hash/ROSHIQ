@@ -1195,7 +1195,9 @@ public sealed class AppHost : IDisposable
     {
         await Task.Delay(TimeSpan.FromSeconds(30));
         var d = Settings.Current.Data;
-        if (d.SteamAccountId != null && (d.ProfileCheckedUtc == null || DateTime.UtcNow - d.ProfileCheckedUtc > TimeSpan.FromHours(12)))
+        // примерного рейтинга ещё нет (первый запуск после обновления или мало матчей) — проверяем чаще, но не чаще раза в 10 минут
+        var profileAge = d.ProfileCheckedUtc is DateTime checkedUtc ? DateTime.UtcNow - checkedUtc : TimeSpan.MaxValue;
+        if (d.SteamAccountId != null && (profileAge > TimeSpan.FromHours(12) || (d.EstimatedRankMatches == null && profileAge > TimeSpan.FromMinutes(10))))
             await RefreshSteamProfileAsync();
         await AutoImportOnceAsync(null);
     }
@@ -1266,6 +1268,8 @@ public sealed class AppHost : IDisposable
         s.Data.EstimatedRankHigh = null;
         s.Data.EstimatedRankMatches = null;
         s.Data.EstimatedRankSolo = false;
+        s.Data.EstimatedRankPrevLow = null;
+        s.Data.EstimatedRankPrevHigh = null;
     }
 
     /// <summary>Обновить ник, аватар, медаль, примерный рейтинг и статистику по героям из OpenDota. Возвращает текст ошибки или null.</summary>
@@ -1280,11 +1284,13 @@ public sealed class AppHost : IDisposable
             var profile = await client.GetPlayerProfileAsync(account, CancellationToken.None);
             var heroes = await client.GetPlayerHeroesAsync(account, CancellationToken.None);
             // примерный рейтинг по соперникам; не получилось — профиль всё равно обновляем
-            RankEstimate? estimate = null;
+            RankEstimate? estimate = null, previous = null;
             bool estimateOk = false;
             try
             {
-                estimate = RankEstimator.Estimate(await client.GetRankedAveragesAsync(account, CancellationToken.None));
+                var ranked = await client.GetRankedAveragesAsync(account, CancellationToken.None);
+                estimate = RankEstimator.Estimate(ranked);
+                previous = RankEstimator.Estimate(ranked, skip: 20);
                 estimateOk = true;
             }
             catch (Exception ex) { Log.Warn("Оценка рейтинга: " + ex.Message); }
@@ -1310,6 +1316,8 @@ public sealed class AppHost : IDisposable
                         s.Data.EstimatedRankHigh = estimate.High;
                         s.Data.EstimatedRankMatches = estimate.Matches;
                         s.Data.EstimatedRankSolo = estimate.SoloOnly;
+                        s.Data.EstimatedRankPrevLow = previous?.Low;
+                        s.Data.EstimatedRankPrevHigh = previous?.High;
                     }
                 }
             });

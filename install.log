@@ -1,190 +1,190 @@
-﻿2026-11-25 13:17:35.448   Log opened. (Time zone: UTC+03:00)
-2026-11-25 13:17:35.448   Setup version: Inno Setup version 7.1.1 (32-bit)
-2026-11-25 13:17:35.448   Original Setup EXE: C:\Users\1\Desktop\ROSHIQ\dist\Roshiq-Setup-0.26.2.exe
-2026-11-25 13:17:35.448   Setup command line: /SL5="$6507F4,91718738,1015808,C:\Users\1\Desktop\ROSHIQ\dist\Roshiq-Setup-0.26.2.exe" /VERYSILENT /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS /NORESTART /LOG="C:\Users\1\Desktop\ROSHIQ\install.log"
-2026-11-25 13:17:35.448   Windows version: 10.0.28000
-2026-11-25 13:17:35.448   Windows architecture: x64 (64-bit)
-2026-11-25 13:17:35.448   Machine types supported by system: x86 x64
-2026-11-25 13:17:35.448   User privileges: None
-2026-11-25 13:17:35.451   Administrative install mode: No
-2026-11-25 13:17:35.451   Install mode root key: HKEY_CURRENT_USER
-2026-11-25 13:17:35.451   64-bit install mode: Yes
-2026-11-25 13:17:35.451   RedirectionGuard status for current process: Enabled in enforcing mode
-2026-11-25 13:17:35.452   Created temporary directory: C:\Temp\is-7VOBIJMY0Y.tmp
-2026-11-25 13:17:35.517   Found 6 files to register with RestartManager.
-2026-11-25 13:17:35.517   Calling RestartManager's RmGetList.
-2026-11-25 13:17:35.532   RmGetList finished successfully.
-2026-11-25 13:17:35.532   RestartManager found no applications using one of our files.
-2026-11-25 13:17:35.537   Starting the installation process.
-2026-11-25 13:17:35.538   Directory for uninstall files: C:\Users\1\AppData\Local\Programs\ROSHIQ
-2026-11-25 13:17:35.538   Will append to existing uninstall log: C:\Users\1\AppData\Local\Programs\ROSHIQ\unins000.dat
-2026-11-25 13:17:35.540   -- File entry --
-2026-11-25 13:17:35.540   Dest filename: C:\Users\1\AppData\Local\Programs\ROSHIQ\unins000.exe
-2026-11-25 13:17:35.540   Non-default bitness: 32-bit
-2026-11-25 13:17:35.542   Time stamp of our file: 2026-11-25T10:17:35.406Z
-2026-11-25 13:17:35.542   Dest file exists.
-2026-11-25 13:17:35.542   Time stamp of existing file: 2026-11-25T10:10:39.715Z
-2026-11-25 13:17:35.542   Version of our file: 51.1056.0.0
-2026-11-25 13:17:35.542   Version of existing file: 51.1056.0.0
-2026-11-25 13:17:35.542   Installing the file.
-2026-11-25 13:17:35.546   Leaving temporary file in place for now.
-2026-11-25 13:17:35.546   -- File entry --
-2026-11-25 13:17:35.547   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.Core.pdb
-2026-11-25 13:17:35.547   Time stamp of our file: 2026-11-25T10:17:06.000Z
-2026-11-25 13:17:35.547   Dest file exists.
-2026-11-25 13:17:35.547   Time stamp of existing file: 2026-11-25T10:10:04.000Z
-2026-11-25 13:17:35.547   Installing the file.
-2026-11-25 13:17:35.549   Successfully installed the file.
-2026-11-25 13:17:35.549   -- File entry --
-2026-11-25 13:17:35.549   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.Data.pdb
-2026-11-25 13:17:35.549   Time stamp of our file: 2026-11-25T10:17:06.000Z
-2026-11-25 13:17:35.549   Dest file exists.
-2026-11-25 13:17:35.549   Time stamp of existing file: 2026-11-25T10:10:06.000Z
-2026-11-25 13:17:35.549   Installing the file.
-2026-11-25 13:17:35.551   Successfully installed the file.
-2026-11-25 13:17:35.551   -- File entry --
-2026-11-25 13:17:35.551   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.Draft.pdb
-2026-11-25 13:17:35.551   Time stamp of our file: 2026-11-25T10:17:08.000Z
-2026-11-25 13:17:35.551   Dest file exists.
-2026-11-25 13:17:35.551   Time stamp of existing file: 2026-11-25T10:10:06.000Z
-2026-11-25 13:17:35.551   Installing the file.
-2026-11-25 13:17:35.551   Successfully installed the file.
-2026-11-25 13:17:35.551   -- File entry --
-2026-11-25 13:17:35.551   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.exe
-2026-11-25 13:17:35.551   Time stamp of our file: 2026-11-25T10:17:18.000Z
-2026-11-25 13:17:35.551   Dest file exists.
-2026-11-25 13:17:35.551   Time stamp of existing file: 2026-11-25T10:10:20.000Z
-2026-11-25 13:17:35.551   Installing the file.
-2026-11-25 13:17:37.542   Successfully installed the file.
-2026-11-25 13:17:37.542   -- File entry --
-2026-11-25 13:17:37.542   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.GSI.pdb
-2026-11-25 13:17:37.542   Time stamp of our file: 2026-11-25T10:17:06.000Z
-2026-11-25 13:17:37.542   Dest file exists.
-2026-11-25 13:17:37.542   Time stamp of existing file: 2026-11-25T10:10:06.000Z
-2026-11-25 13:17:37.542   Installing the file.
-2026-11-25 13:17:37.544   Successfully installed the file.
-2026-11-25 13:17:37.544   -- File entry --
-2026-11-25 13:17:37.544   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.Overlay.pdb
-2026-11-25 13:17:37.550   Time stamp of our file: 2026-11-25T10:17:08.000Z
-2026-11-25 13:17:37.550   Dest file exists.
-2026-11-25 13:17:37.550   Time stamp of existing file: 2026-11-25T10:10:06.000Z
-2026-11-25 13:17:37.550   Installing the file.
-2026-11-25 13:17:37.551   Successfully installed the file.
-2026-11-25 13:17:37.551   -- File entry --
-2026-11-25 13:17:37.551   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.pdb
-2026-11-25 13:17:37.552   Time stamp of our file: 2026-11-25T10:17:10.000Z
-2026-11-25 13:17:37.552   Dest file exists.
-2026-11-25 13:17:37.552   Time stamp of existing file: 2026-11-25T10:10:10.000Z
-2026-11-25 13:17:37.552   Installing the file.
-2026-11-25 13:17:37.560   Successfully installed the file.
-2026-11-25 13:17:37.560   -- File entry --
-2026-11-25 13:17:37.560   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.Recommendations.pdb
-2026-11-25 13:17:37.560   Time stamp of our file: 2026-11-25T10:17:08.000Z
-2026-11-25 13:17:37.560   Dest file exists.
-2026-11-25 13:17:37.560   Time stamp of existing file: 2026-11-25T10:10:06.000Z
-2026-11-25 13:17:37.560   Installing the file.
-2026-11-25 13:17:37.563   Successfully installed the file.
-2026-11-25 13:17:37.563   -- File entry --
-2026-11-25 13:17:37.563   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.Vision.pdb
-2026-11-25 13:17:37.563   Time stamp of our file: 2026-11-25T10:17:06.000Z
-2026-11-25 13:17:37.563   Dest file exists.
-2026-11-25 13:17:37.563   Time stamp of existing file: 2026-11-25T10:10:06.000Z
-2026-11-25 13:17:37.563   Installing the file.
-2026-11-25 13:17:37.564   Successfully installed the file.
-2026-11-25 13:17:37.564   -- File entry --
-2026-11-25 13:17:37.564   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Tesseract.dll
-2026-11-25 13:17:37.564   Time stamp of our file: 2022-11-30T08:37:16.000Z
-2026-11-25 13:17:37.564   Dest file exists.
-2026-11-25 13:17:37.564   Time stamp of existing file: 2022-11-30T08:37:16.000Z
-2026-11-25 13:17:37.564   Installing the file.
-2026-11-25 13:17:37.567   Successfully installed the file.
-2026-11-25 13:17:37.567   -- File entry --
-2026-11-25 13:17:37.567   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\tessdata\eng.traineddata
-2026-11-25 13:17:37.567   Time stamp of our file: 2026-11-10T19:30:38.000Z
-2026-11-25 13:17:37.568   Dest file exists.
-2026-11-25 13:17:37.568   Time stamp of existing file: 2026-11-10T19:30:38.000Z
-2026-11-25 13:17:37.568   Installing the file.
-2026-11-25 13:17:37.664   Successfully installed the file.
-2026-11-25 13:17:37.664   -- File entry --
-2026-11-25 13:17:37.664   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\tessdata\LICENSE.txt
-2026-11-25 13:17:37.664   Time stamp of our file: 2026-11-10T21:36:58.000Z
-2026-11-25 13:17:37.664   Dest file exists.
-2026-11-25 13:17:37.664   Time stamp of existing file: 2026-11-10T21:36:58.000Z
-2026-11-25 13:17:37.664   Installing the file.
-2026-11-25 13:17:37.665   Successfully installed the file.
-2026-11-25 13:17:37.665   -- File entry --
-2026-11-25 13:17:37.665   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\tessdata\rus.traineddata
-2026-11-25 13:17:37.665   Time stamp of our file: 2026-11-10T19:30:36.000Z
-2026-11-25 13:17:37.665   Dest file exists.
-2026-11-25 13:17:37.665   Time stamp of existing file: 2026-11-10T19:30:36.000Z
-2026-11-25 13:17:37.665   Installing the file.
-2026-11-25 13:17:37.747   Successfully installed the file.
-2026-11-25 13:17:37.748   -- File entry --
-2026-11-25 13:17:37.748   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\tessdata\SOURCES.txt
-2026-11-25 13:17:37.748   Time stamp of our file: 2026-11-10T21:37:06.000Z
-2026-11-25 13:17:37.748   Dest file exists.
-2026-11-25 13:17:37.748   Time stamp of existing file: 2026-11-10T21:37:06.000Z
-2026-11-25 13:17:37.748   Installing the file.
-2026-11-25 13:17:37.749   Successfully installed the file.
-2026-11-25 13:17:37.749   -- File entry --
-2026-11-25 13:17:37.749   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\x64\leptonica-1.82.0.dll
-2026-11-25 13:17:37.749   Time stamp of our file: 2022-11-30T08:33:16.000Z
-2026-11-25 13:17:37.749   Dest file exists.
-2026-11-25 13:17:37.749   Time stamp of existing file: 2022-11-30T08:33:16.000Z
-2026-11-25 13:17:37.749   Installing the file.
-2026-11-25 13:17:37.840   Successfully installed the file.
-2026-11-25 13:17:37.840   -- File entry --
-2026-11-25 13:17:37.840   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\x64\tesseract50.dll
-2026-11-25 13:17:37.840   Time stamp of our file: 2022-11-30T08:33:16.000Z
-2026-11-25 13:17:37.840   Dest file exists.
-2026-11-25 13:17:37.840   Time stamp of existing file: 2022-11-30T08:33:16.000Z
-2026-11-25 13:17:37.840   Installing the file.
-2026-11-25 13:17:37.902   Successfully installed the file.
-2026-11-25 13:17:37.902   -- File entry --
-2026-11-25 13:17:37.902   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\x86\leptonica-1.82.0.dll
-2026-11-25 13:17:37.903   Time stamp of our file: 2022-11-30T08:33:16.000Z
-2026-11-25 13:17:37.903   Dest file exists.
-2026-11-25 13:17:37.903   Time stamp of existing file: 2022-11-30T08:33:16.000Z
-2026-11-25 13:17:37.903   Installing the file.
-2026-11-25 13:17:37.966   Successfully installed the file.
-2026-11-25 13:17:37.967   -- File entry --
-2026-11-25 13:17:37.967   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\x86\tesseract50.dll
-2026-11-25 13:17:37.967   Time stamp of our file: 2022-11-30T08:33:16.000Z
-2026-11-25 13:17:37.967   Dest file exists.
-2026-11-25 13:17:37.967   Time stamp of existing file: 2022-11-30T08:33:16.000Z
-2026-11-25 13:17:37.967   Installing the file.
-2026-11-25 13:17:38.018   Successfully installed the file.
-2026-11-25 13:17:38.018   -- File entry --
-2026-11-25 13:17:38.018   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\README.md
-2026-11-25 13:17:38.018   Time stamp of our file: 2026-11-25T10:16:18.000Z
-2026-11-25 13:17:38.018   Dest file exists.
-2026-11-25 13:17:38.018   Time stamp of existing file: 2026-11-23T11:26:52.000Z
-2026-11-25 13:17:38.018   Installing the file.
-2026-11-25 13:17:38.019   Successfully installed the file.
-2026-11-25 13:17:38.019   -- Icon entry --
-2026-11-25 13:17:38.019   Dest filename: C:\Users\1\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\ROSHIQ\ROSHIQ.lnk
-2026-11-25 13:17:38.020   Creating the icon.
-2026-11-25 13:17:38.108   Successfully created the icon.
-2026-11-25 13:17:38.118   -- Icon entry --
-2026-11-25 13:17:38.118   Dest filename: C:\Users\1\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\ROSHIQ\Деинсталлировать ROSHIQ.lnk
-2026-11-25 13:17:38.118   Creating the icon.
-2026-11-25 13:17:38.124   Successfully created the icon.
-2026-11-25 13:17:38.151   -- Icon entry --
-2026-11-25 13:17:38.151   Dest filename: C:\Users\1\Desktop\ROSHIQ.lnk
-2026-11-25 13:17:38.152   Creating the icon.
-2026-11-25 13:17:38.158   Successfully created the icon.
-2026-11-25 13:17:38.166   Saving uninstall information.
-2026-11-25 13:17:38.166   Renaming uninstaller.
-2026-11-25 13:17:38.167   Deleting uninstall key left over from previous non administrative install.
-2026-11-25 13:17:38.167   Creating new uninstall key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall\{7B1C2E64-5F0A-4C61-9D3E-0D0A7A5E2B11}_is1
-2026-11-25 13:17:38.167   Writing uninstall key values.
-2026-11-25 13:17:38.167   Detected previous administrative 64-bit install? No
-2026-11-25 13:17:38.167   Detected previous administrative 32-bit install? No
-2026-11-25 13:17:38.173   Installation process succeeded.
-2026-11-25 13:17:38.176   -- Run entry --
-2026-11-25 13:17:38.176   Run as: Current user
-2026-11-25 13:17:38.176   Type: Exec
-2026-11-25 13:17:38.176   Filename: C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.exe
-2026-11-25 13:17:38.184   Need to restart Windows? No
-2026-11-25 13:17:38.186   Deinitializing Setup.
-2026-11-25 13:17:38.192   Log closed.
+﻿2026-11-25 13:30:34.537   Log opened. (Time zone: UTC+03:00)
+2026-11-25 13:30:34.537   Setup version: Inno Setup version 7.1.1 (32-bit)
+2026-11-25 13:30:34.537   Original Setup EXE: C:\Users\1\Desktop\ROSHIQ\dist\Roshiq-Setup-0.27.0.exe
+2026-11-25 13:30:34.537   Setup command line: /SL5="$170896,91721616,1015808,C:\Users\1\Desktop\ROSHIQ\dist\Roshiq-Setup-0.27.0.exe" /VERYSILENT /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS /NORESTART /LOG="C:\Users\1\Desktop\ROSHIQ\install.log"
+2026-11-25 13:30:34.537   Windows version: 10.0.28000
+2026-11-25 13:30:34.537   Windows architecture: x64 (64-bit)
+2026-11-25 13:30:34.537   Machine types supported by system: x86 x64
+2026-11-25 13:30:34.537   User privileges: None
+2026-11-25 13:30:34.540   Administrative install mode: No
+2026-11-25 13:30:34.540   Install mode root key: HKEY_CURRENT_USER
+2026-11-25 13:30:34.540   64-bit install mode: Yes
+2026-11-25 13:30:34.540   RedirectionGuard status for current process: Enabled in enforcing mode
+2026-11-25 13:30:34.541   Created temporary directory: C:\Temp\is-D615DINH9P.tmp
+2026-11-25 13:30:34.664   Found 6 files to register with RestartManager.
+2026-11-25 13:30:34.664   Calling RestartManager's RmGetList.
+2026-11-25 13:30:34.683   RmGetList finished successfully.
+2026-11-25 13:30:34.683   RestartManager found no applications using one of our files.
+2026-11-25 13:30:34.688   Starting the installation process.
+2026-11-25 13:30:34.691   Directory for uninstall files: C:\Users\1\AppData\Local\Programs\ROSHIQ
+2026-11-25 13:30:34.691   Will append to existing uninstall log: C:\Users\1\AppData\Local\Programs\ROSHIQ\unins000.dat
+2026-11-25 13:30:34.693   -- File entry --
+2026-11-25 13:30:34.693   Dest filename: C:\Users\1\AppData\Local\Programs\ROSHIQ\unins000.exe
+2026-11-25 13:30:34.693   Non-default bitness: 32-bit
+2026-11-25 13:30:34.695   Time stamp of our file: 2026-11-25T10:30:34.470Z
+2026-11-25 13:30:34.695   Dest file exists.
+2026-11-25 13:30:34.696   Time stamp of existing file: 2026-11-25T10:17:35.406Z
+2026-11-25 13:30:34.696   Version of our file: 51.1056.0.0
+2026-11-25 13:30:34.696   Version of existing file: 51.1056.0.0
+2026-11-25 13:30:34.696   Installing the file.
+2026-11-25 13:30:34.701   Leaving temporary file in place for now.
+2026-11-25 13:30:34.702   -- File entry --
+2026-11-25 13:30:34.702   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.Core.pdb
+2026-11-25 13:30:34.702   Time stamp of our file: 2026-11-25T10:30:06.000Z
+2026-11-25 13:30:34.702   Dest file exists.
+2026-11-25 13:30:34.702   Time stamp of existing file: 2026-11-25T10:17:06.000Z
+2026-11-25 13:30:34.702   Installing the file.
+2026-11-25 13:30:34.704   Successfully installed the file.
+2026-11-25 13:30:34.704   -- File entry --
+2026-11-25 13:30:34.704   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.Data.pdb
+2026-11-25 13:30:34.704   Time stamp of our file: 2026-11-25T10:30:06.000Z
+2026-11-25 13:30:34.704   Dest file exists.
+2026-11-25 13:30:34.704   Time stamp of existing file: 2026-11-25T10:17:06.000Z
+2026-11-25 13:30:34.705   Installing the file.
+2026-11-25 13:30:34.706   Successfully installed the file.
+2026-11-25 13:30:34.706   -- File entry --
+2026-11-25 13:30:34.706   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.Draft.pdb
+2026-11-25 13:30:34.706   Time stamp of our file: 2026-11-25T10:30:06.000Z
+2026-11-25 13:30:34.707   Dest file exists.
+2026-11-25 13:30:34.707   Time stamp of existing file: 2026-11-25T10:17:08.000Z
+2026-11-25 13:30:34.707   Installing the file.
+2026-11-25 13:30:34.708   Successfully installed the file.
+2026-11-25 13:30:34.708   -- File entry --
+2026-11-25 13:30:34.708   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.exe
+2026-11-25 13:30:34.708   Time stamp of our file: 2026-11-25T10:30:16.000Z
+2026-11-25 13:30:34.708   Dest file exists.
+2026-11-25 13:30:34.708   Time stamp of existing file: 2026-11-25T10:17:18.000Z
+2026-11-25 13:30:34.708   Installing the file.
+2026-11-25 13:30:36.808   Successfully installed the file.
+2026-11-25 13:30:36.808   -- File entry --
+2026-11-25 13:30:36.808   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.GSI.pdb
+2026-11-25 13:30:36.808   Time stamp of our file: 2026-11-25T10:30:06.000Z
+2026-11-25 13:30:36.808   Dest file exists.
+2026-11-25 13:30:36.808   Time stamp of existing file: 2026-11-25T10:17:06.000Z
+2026-11-25 13:30:36.808   Installing the file.
+2026-11-25 13:30:36.809   Successfully installed the file.
+2026-11-25 13:30:36.809   -- File entry --
+2026-11-25 13:30:36.809   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.Overlay.pdb
+2026-11-25 13:30:36.809   Time stamp of our file: 2026-11-25T10:30:06.000Z
+2026-11-25 13:30:36.809   Dest file exists.
+2026-11-25 13:30:36.809   Time stamp of existing file: 2026-11-25T10:17:08.000Z
+2026-11-25 13:30:36.809   Installing the file.
+2026-11-25 13:30:36.811   Successfully installed the file.
+2026-11-25 13:30:36.811   -- File entry --
+2026-11-25 13:30:36.811   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.pdb
+2026-11-25 13:30:36.811   Time stamp of our file: 2026-11-25T10:30:10.000Z
+2026-11-25 13:30:36.811   Dest file exists.
+2026-11-25 13:30:36.811   Time stamp of existing file: 2026-11-25T10:17:10.000Z
+2026-11-25 13:30:36.811   Installing the file.
+2026-11-25 13:30:36.819   Successfully installed the file.
+2026-11-25 13:30:36.819   -- File entry --
+2026-11-25 13:30:36.821   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.Recommendations.pdb
+2026-11-25 13:30:36.821   Time stamp of our file: 2026-11-25T10:30:06.000Z
+2026-11-25 13:30:36.821   Dest file exists.
+2026-11-25 13:30:36.821   Time stamp of existing file: 2026-11-25T10:17:08.000Z
+2026-11-25 13:30:36.821   Installing the file.
+2026-11-25 13:30:36.823   Successfully installed the file.
+2026-11-25 13:30:36.823   -- File entry --
+2026-11-25 13:30:36.823   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.Vision.pdb
+2026-11-25 13:30:36.823   Time stamp of our file: 2026-11-25T10:30:06.000Z
+2026-11-25 13:30:36.823   Dest file exists.
+2026-11-25 13:30:36.824   Time stamp of existing file: 2026-11-25T10:17:06.000Z
+2026-11-25 13:30:36.824   Installing the file.
+2026-11-25 13:30:36.825   Successfully installed the file.
+2026-11-25 13:30:36.825   -- File entry --
+2026-11-25 13:30:36.825   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\Tesseract.dll
+2026-11-25 13:30:36.825   Time stamp of our file: 2022-11-30T08:37:16.000Z
+2026-11-25 13:30:36.825   Dest file exists.
+2026-11-25 13:30:36.825   Time stamp of existing file: 2022-11-30T08:37:16.000Z
+2026-11-25 13:30:36.825   Installing the file.
+2026-11-25 13:30:36.828   Successfully installed the file.
+2026-11-25 13:30:36.828   -- File entry --
+2026-11-25 13:30:36.828   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\tessdata\eng.traineddata
+2026-11-25 13:30:36.828   Time stamp of our file: 2026-11-10T19:30:38.000Z
+2026-11-25 13:30:36.828   Dest file exists.
+2026-11-25 13:30:36.828   Time stamp of existing file: 2026-11-10T19:30:38.000Z
+2026-11-25 13:30:36.828   Installing the file.
+2026-11-25 13:30:36.927   Successfully installed the file.
+2026-11-25 13:30:36.927   -- File entry --
+2026-11-25 13:30:36.927   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\tessdata\LICENSE.txt
+2026-11-25 13:30:36.927   Time stamp of our file: 2026-11-10T21:36:58.000Z
+2026-11-25 13:30:36.927   Dest file exists.
+2026-11-25 13:30:36.927   Time stamp of existing file: 2026-11-10T21:36:58.000Z
+2026-11-25 13:30:36.927   Installing the file.
+2026-11-25 13:30:36.928   Successfully installed the file.
+2026-11-25 13:30:36.928   -- File entry --
+2026-11-25 13:30:36.928   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\tessdata\rus.traineddata
+2026-11-25 13:30:36.928   Time stamp of our file: 2026-11-10T19:30:36.000Z
+2026-11-25 13:30:36.928   Dest file exists.
+2026-11-25 13:30:36.928   Time stamp of existing file: 2026-11-10T19:30:36.000Z
+2026-11-25 13:30:36.928   Installing the file.
+2026-11-25 13:30:37.013   Successfully installed the file.
+2026-11-25 13:30:37.013   -- File entry --
+2026-11-25 13:30:37.013   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\tessdata\SOURCES.txt
+2026-11-25 13:30:37.014   Time stamp of our file: 2026-11-10T21:37:06.000Z
+2026-11-25 13:30:37.014   Dest file exists.
+2026-11-25 13:30:37.014   Time stamp of existing file: 2026-11-10T21:37:06.000Z
+2026-11-25 13:30:37.014   Installing the file.
+2026-11-25 13:30:37.015   Successfully installed the file.
+2026-11-25 13:30:37.015   -- File entry --
+2026-11-25 13:30:37.015   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\x64\leptonica-1.82.0.dll
+2026-11-25 13:30:37.015   Time stamp of our file: 2022-11-30T08:33:16.000Z
+2026-11-25 13:30:37.015   Dest file exists.
+2026-11-25 13:30:37.015   Time stamp of existing file: 2022-11-30T08:33:16.000Z
+2026-11-25 13:30:37.015   Installing the file.
+2026-11-25 13:30:37.109   Successfully installed the file.
+2026-11-25 13:30:37.109   -- File entry --
+2026-11-25 13:30:37.109   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\x64\tesseract50.dll
+2026-11-25 13:30:37.110   Time stamp of our file: 2022-11-30T08:33:16.000Z
+2026-11-25 13:30:37.110   Dest file exists.
+2026-11-25 13:30:37.110   Time stamp of existing file: 2022-11-30T08:33:16.000Z
+2026-11-25 13:30:37.110   Installing the file.
+2026-11-25 13:30:37.175   Successfully installed the file.
+2026-11-25 13:30:37.175   -- File entry --
+2026-11-25 13:30:37.175   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\x86\leptonica-1.82.0.dll
+2026-11-25 13:30:37.175   Time stamp of our file: 2022-11-30T08:33:16.000Z
+2026-11-25 13:30:37.175   Dest file exists.
+2026-11-25 13:30:37.175   Time stamp of existing file: 2022-11-30T08:33:16.000Z
+2026-11-25 13:30:37.175   Installing the file.
+2026-11-25 13:30:37.239   Successfully installed the file.
+2026-11-25 13:30:37.239   -- File entry --
+2026-11-25 13:30:37.239   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\x86\tesseract50.dll
+2026-11-25 13:30:37.240   Time stamp of our file: 2022-11-30T08:33:16.000Z
+2026-11-25 13:30:37.240   Dest file exists.
+2026-11-25 13:30:37.240   Time stamp of existing file: 2022-11-30T08:33:16.000Z
+2026-11-25 13:30:37.240   Installing the file.
+2026-11-25 13:30:37.291   Successfully installed the file.
+2026-11-25 13:30:37.291   -- File entry --
+2026-11-25 13:30:37.291   Dest filename: \\?\C:\Users\1\AppData\Local\Programs\ROSHIQ\README.md
+2026-11-25 13:30:37.292   Time stamp of our file: 2026-11-25T10:28:08.000Z
+2026-11-25 13:30:37.292   Dest file exists.
+2026-11-25 13:30:37.292   Time stamp of existing file: 2026-11-25T10:16:18.000Z
+2026-11-25 13:30:37.292   Installing the file.
+2026-11-25 13:30:37.293   Successfully installed the file.
+2026-11-25 13:30:37.293   -- Icon entry --
+2026-11-25 13:30:37.293   Dest filename: C:\Users\1\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\ROSHIQ\ROSHIQ.lnk
+2026-11-25 13:30:37.293   Creating the icon.
+2026-11-25 13:30:37.372   Successfully created the icon.
+2026-11-25 13:30:37.382   -- Icon entry --
+2026-11-25 13:30:37.382   Dest filename: C:\Users\1\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\ROSHIQ\Деинсталлировать ROSHIQ.lnk
+2026-11-25 13:30:37.382   Creating the icon.
+2026-11-25 13:30:37.389   Successfully created the icon.
+2026-11-25 13:30:37.418   -- Icon entry --
+2026-11-25 13:30:37.418   Dest filename: C:\Users\1\Desktop\ROSHIQ.lnk
+2026-11-25 13:30:37.419   Creating the icon.
+2026-11-25 13:30:37.425   Successfully created the icon.
+2026-11-25 13:30:37.438   Saving uninstall information.
+2026-11-25 13:30:37.438   Renaming uninstaller.
+2026-11-25 13:30:37.438   Deleting uninstall key left over from previous non administrative install.
+2026-11-25 13:30:37.439   Creating new uninstall key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall\{7B1C2E64-5F0A-4C61-9D3E-0D0A7A5E2B11}_is1
+2026-11-25 13:30:37.439   Writing uninstall key values.
+2026-11-25 13:30:37.439   Detected previous administrative 64-bit install? No
+2026-11-25 13:30:37.439   Detected previous administrative 32-bit install? No
+2026-11-25 13:30:37.442   Installation process succeeded.
+2026-11-25 13:30:37.446   -- Run entry --
+2026-11-25 13:30:37.446   Run as: Current user
+2026-11-25 13:30:37.446   Type: Exec
+2026-11-25 13:30:37.446   Filename: C:\Users\1\AppData\Local\Programs\ROSHIQ\Roshiq.exe
+2026-11-25 13:30:37.455   Need to restart Windows? No
+2026-11-25 13:30:37.461   Deinitializing Setup.
+2026-11-25 13:30:37.468   Log closed.

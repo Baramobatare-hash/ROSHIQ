@@ -196,9 +196,9 @@ public static class RankEstimator
     }
 
     /// <param name="matches">average_rank и размер пати рейтинговых матчей, новые первыми.</param>
-    public static RankEstimate? Estimate(IEnumerable<(int AverageRank, int PartySize)> matches, int take = 20)
+    public static RankEstimate? Estimate(IEnumerable<(int AverageRank, int PartySize)> matches, int take = 20, int skip = 0)
     {
-        var all = matches.Where(m => m.AverageRank >= 10).Take(take).ToList();
+        var all = matches.Where(m => m.AverageRank >= 10).Skip(skip).Take(take).ToList();
         var solo = all.Where(m => m.PartySize <= 1).ToList();
         bool soloOnly = solo.Count >= MinMatches;
         var used = soloOnly ? solo : all;
@@ -206,6 +206,40 @@ public static class RankEstimator
         var steps = used.Select(m => ToStep(m.AverageRank)).OrderBy(x => x).ToList();
         int Pct(double p) => steps[(int)Math.Round(p * (steps.Count - 1))];
         return new RankEstimate(FromStep(Pct(0.25)), FromStep(Pct(0.75)), used.Count, soloOnly);
+    }
+
+    /// <summary>Середина вилки в ступенях — для сравнения «было / стало».</summary>
+    public static double Mid(int low, int high) => (ToStep(low) + ToStep(high)) / 2.0;
+
+    /// <summary>Сдвиг между прошлой и нынешней вилкой: +1 — выше, −1 — ниже, 0 — на месте (меньше ступени разницы).</summary>
+    public static int Direction(int prevLow, int prevHigh, int low, int high)
+    {
+        double d = Mid(low, high) - Mid(prevLow, prevHigh);
+        return d >= 1 ? 1 : d <= -1 ? -1 : 0;
+    }
+
+    /// <summary>
+    /// Герои на калибровку: от 10 игр, сыграны за последний год, ранжируем по нижней границе доверительного
+    /// интервала Уилсона — 60% на 50 играх надёжнее 80% на 10. Берём только тех, у кого граница от 45%.
+    /// </summary>
+    public static IReadOnlyList<PlayerHeroStat> CalibrationHeroes(IEnumerable<PlayerHeroStat> stats, DateTime nowUtc, int take = 3)
+    {
+        long since = new DateTimeOffset(nowUtc.AddDays(-365)).ToUnixTimeSeconds();
+        return stats
+            .Where(s => s.Games >= 10 && s.LastPlayed >= since)
+            .Select(s => (Stat: s, Score: Wilson(s.Wins, s.Games)))
+            .Where(x => x.Score >= 0.45)
+            .OrderByDescending(x => x.Score)
+            .Take(take)
+            .Select(x => x.Stat)
+            .ToList();
+    }
+
+    public static double Wilson(int wins, int games, double z = 1.64)
+    {
+        if (games <= 0) return 0;
+        double p = (double)wins / games, z2 = z * z;
+        return (p + z2 / (2 * games) - z * Math.Sqrt((p * (1 - p) + z2 / (4 * games)) / games)) / (1 + z2 / games);
     }
 
     /// <summary>«Страж 5 – Рыцарь 1» или одна медаль, если границы совпали.</summary>

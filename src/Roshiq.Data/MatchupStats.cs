@@ -335,7 +335,7 @@ public sealed class OpenDotaClient : IDisposable
     }
 
     /// <summary>Последние рейтинговые матчи игрока: средняя медаль матча (average_rank) и размер пати. Новые первыми.</summary>
-    public async Task<IReadOnlyList<(int AverageRank, int PartySize)>> GetRankedAveragesAsync(long accountId, CancellationToken ct, int limit = 30)
+    public async Task<IReadOnlyList<(int AverageRank, int PartySize)>> GetRankedAveragesAsync(long accountId, CancellationToken ct, int limit = 60)
     {
         using var doc = await GetDocumentAsync($"/players/{accountId}/matches?limit={limit}&lobby_type=7", ct).ConfigureAwait(false);
         var list = new List<(int, int)>();

@@ -264,6 +264,9 @@ public sealed class DataSettings
     public int? EstimatedRankHigh { get; set; }
     public int? EstimatedRankMatches { get; set; }
     public bool EstimatedRankSolo { get; set; }
+    /// <summary>Та же оценка по предыдущим 20 рейтинговым матчам — чтобы показать, растёт рейтинг или падает.</summary>
+    public int? EstimatedRankPrevLow { get; set; }
+    public int? EstimatedRankPrevHigh { get; set; }
     /// <summary>Видит ли OpenDota ваши матчи (null — неизвестно). false — в Dota 2 выключена общедоступная история матчей.</summary>
     public bool? PublicMatchData { get; set; }
     /// <summary>Учитывать вашу статистику на героях в советах драфта.</summary>

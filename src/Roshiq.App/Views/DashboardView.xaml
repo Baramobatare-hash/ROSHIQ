@@ -206,6 +206,7 @@
                                     <TextBlock x:Name="ProfileName" Style="{StaticResource Value}" FontWeight="Bold" />
                                     <TextBlock x:Name="ProfileSub" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
                                     <TextBlock x:Name="ProfileRank" Style="{StaticResource MutedText}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,2,0,0" />
+                                    <TextBlock x:Name="ProfileCalib" Style="{StaticResource MutedText}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,2,0,0" />
                                     <TextBlock x:Name="ProfileWeak" Style="{StaticResource MutedText}" Foreground="{DynamicResource Warning}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,2,0,0" />
                                 </StackPanel>
                             </DockPanel>

@@ -109,6 +109,7 @@ public partial class DashboardView : UserControl, IRefreshable
             ProfileButton.Content = L.Get("dash_steam_link_btn").ToUpperInvariant();
             ProfileWeak.Visibility = Visibility.Collapsed;
             ProfileRank.Visibility = Visibility.Collapsed;
+            ProfileCalib.Visibility = Visibility.Collapsed;
             SetProfileAvatar(null);
             return;
         }
@@ -150,6 +151,7 @@ public partial class DashboardView : UserControl, IRefreshable
     /// </summary>
     private void RefreshRankEstimate(Roshiq.Core.Settings.DataSettings d, Loc L)
     {
+        RefreshCalibrationHeroes(d, L);
         if (d.EstimatedRankLow is not int lo || d.EstimatedRankHigh is not int hi || d.EstimatedRankMatches is not int n)
         {
             bool noMedal = Roshiq.Data.Ranks.Name(d.RankTier, d.LeaderboardRank, L.Language) == null;
@@ -163,10 +165,35 @@ public partial class DashboardView : UserControl, IRefreshable
         }
         var range = Roshiq.Data.RankEstimator.Range(new Roshiq.Data.RankEstimate(lo, hi, n, d.EstimatedRankSolo), L.Language);
         bool calibrated = Roshiq.Data.Ranks.Name(d.RankTier, d.LeaderboardRank, L.Language) != null;
-        ProfileRank.Text = L.Format(calibrated ? "dash_rank_opponents" : "dash_rank_estimate", range, n);
+        var text = L.Format(calibrated ? "dash_rank_opponents" : "dash_rank_estimate", range, n);
+        // как было 20 рейтинговых матчей назад — растёт оценка или падает
+        if (d.EstimatedRankPrevLow is int plo && d.EstimatedRankPrevHigh is int phi)
+        {
+            int dir = Roshiq.Data.RankEstimator.Direction(plo, phi, lo, hi);
+            var prev = Roshiq.Data.RankEstimator.Range(new Roshiq.Data.RankEstimate(plo, phi, 0, false), L.Language);
+            text += " · " + L.Format(dir > 0 ? "dash_rank_trend_up" : dir < 0 ? "dash_rank_trend_down" : "dash_rank_trend_same", prev);
+        }
+        ProfileRank.Text = text;
         ProfileRank.Foreground = Ui.Res(calibrated ? "Muted" : "Text");
         ProfileRank.ToolTip = L.Get(d.EstimatedRankSolo ? "dash_rank_estimate_tip" : "dash_rank_estimate_tip_party");
         ProfileRank.Visibility = Visibility.Visible;
+    }
+
+    /// <summary>Без медали — герои, на которых у вас лучший надёжный винрейт: их и стоит брать на калибровку.</summary>
+    private void RefreshCalibrationHeroes(Roshiq.Core.Settings.DataSettings d, Loc L)
+    {
+        bool calibrated = Roshiq.Data.Ranks.Name(d.RankTier, d.LeaderboardRank, L.Language) != null;
+        var heroes = calibrated ? Array.Empty<Roshiq.Data.PlayerHeroStat>()
+            : Roshiq.Data.RankEstimator.CalibrationHeroes(App.Host.PlayerHeroes.All.Values, DateTime.UtcNow);
+        var names = heroes
+            .Select(s => App.Host.Database.FindHero(s.HeroId) is { } h
+                ? L.Format("dash_calib_hero", h.DisplayName(L.Language), s.WinRate, s.Games) : null)
+            .Where(x => x != null)
+            .ToList();
+        if (names.Count == 0) { ProfileCalib.Visibility = Visibility.Collapsed; return; }
+        ProfileCalib.Text = L.Format("dash_calib", string.Join(", ", names));
+        ProfileCalib.ToolTip = L.Get("dash_calib_tip");
+        ProfileCalib.Visibility = Visibility.Visible;
     }
 
     private void SetProfileAvatar(string? url)

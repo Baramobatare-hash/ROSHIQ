@@ -974,6 +974,13 @@ internal static class StringsExtra
             "The game matches you by a hidden rating, so the average medal in your recent solo ranked matches shows your level. It is an estimate, not a medal: during the first calibration games it can shift noticeably."),
         ["dash_rank_estimate_tip_party"] = ("Игра подбирает матчи по скрытому рейтингу, поэтому средняя медаль игроков в ваших последних рейтинговых матчах показывает ваш уровень. Одиночных матчей пока мало, поэтому учтены и игры в группе — они сдвигают оценку к рейтингу группы.",
             "The game matches you by a hidden rating, so the average medal in your recent ranked matches shows your level. There are few solo matches yet, so party games are counted too: they pull the estimate toward the party's rating."),
+        ["dash_rank_trend_up"] = ("20 матчей назад было {0} — растёт", "20 matches ago: {0}, going up"),
+        ["dash_rank_trend_down"] = ("20 матчей назад было {0} — снижается", "20 matches ago: {0}, going down"),
+        ["dash_rank_trend_same"] = ("20 матчей назад было {0} — на месте", "20 matches ago: {0}, holding steady"),
+        ["dash_calib"] = ("На калибровку: {0}", "For calibration: {0}"),
+        ["dash_calib_hero"] = ("{0} {1:P0} ({2} игр)", "{0} {1:P0} ({2} games)"),
+        ["dash_calib_tip"] = ("Герои, на которых у вас лучший винрейт с учётом числа игр (от 10 игр, сыгранные за последний год). На калибровке берите своих героев, а не новых.",
+            "Heroes with your best win rate, adjusted for the number of games (10+ games, played in the last year). During calibration, pick heroes you know rather than new ones."),
         ["dash_weak"] = ("Проседает: {0} — в среднем хуже, чем у {1}% игроков на ваших героях ({2} матчей)", "Weak spot: {0} — on average below {1}% of players on your heroes ({2} matches)"),
         ["set_auto_review"] = ("Разбор матча через OpenDota", "Match review via OpenDota"),
         // ---------- Steam (0.9)

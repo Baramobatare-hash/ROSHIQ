@@ -50,4 +50,37 @@ public class RankEstimateTests
         Assert.Equal(53, e.High);
         Assert.Equal("Легенда 2 – Легенда 3", RankEstimator.Range(e, Language.Russian));
     }
+
+    [Fact]
+    public void Trend_ComparesWithPrevious20Matches()
+    {
+        // свежие 20 — Рыцарь 1–2, прошлые 20 — Страж 2–3
+        var rows = Enumerable.Repeat((31, 1), 10).Concat(Enumerable.Repeat((32, 1), 10))
+            .Concat(Enumerable.Repeat((22, 1), 10)).Concat(Enumerable.Repeat((23, 1), 10)).ToList();
+        var now = RankEstimator.Estimate(rows)!;
+        var prev = RankEstimator.Estimate(rows, skip: 20)!;
+        Assert.Equal((31, 32), (now.Low, now.High));
+        Assert.Equal((22, 23), (prev.Low, prev.High));
+        Assert.Equal(1, RankEstimator.Direction(prev.Low, prev.High, now.Low, now.High));
+        Assert.Equal(-1, RankEstimator.Direction(now.Low, now.High, prev.Low, prev.High));
+        Assert.Equal(0, RankEstimator.Direction(31, 32, 31, 31));
+    }
+
+    [Fact]
+    public void CalibrationHeroes_PreferReliableWinRate()
+    {
+        var now = new DateTime(2026, 11, 25, 0, 0, 0, DateTimeKind.Utc);
+        long recent = new DateTimeOffset(now.AddDays(-10)).ToUnixTimeSeconds();
+        long old = new DateTimeOffset(now.AddDays(-500)).ToUnixTimeSeconds();
+        var stats = new[]
+        {
+            new PlayerHeroStat(1, 10, 8, recent),   // 80% на 10 играх
+            new PlayerHeroStat(2, 60, 39, recent),  // 65% на 60 играх — надёжнее
+            new PlayerHeroStat(3, 9, 9, recent),    // меньше 10 игр
+            new PlayerHeroStat(4, 80, 60, old),     // давно не играл
+            new PlayerHeroStat(5, 50, 20, recent),  // 40% — не советуем
+        };
+        var picks = RankEstimator.CalibrationHeroes(stats, now);
+        Assert.Equal(new[] { 2, 1 }, picks.Select(p => p.HeroId).ToArray());
+    }
 }
