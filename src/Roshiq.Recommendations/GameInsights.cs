@@ -23,10 +23,10 @@ public sealed record LaneOpponentAdvice(Hero Hero, IReadOnlyList<LaneTip> Tips, 
             : $"Линию против него выигрывают {w}%, проигрывают {l}% (STRATZ, {m.Matches:N0} игр).";
         if (m.Edge <= -0.08)
             text += lang == Language.English ? " Tough lane — play safe near your tower and don't trade first."
-                : " Тяжёлая линия — играй от своей вышки и не начинай размены первым.";
+                : " Тяжёлая линия — играйте от своей вышки и не начинайте размены первыми.";
         else if (m.Edge >= 0.08)
             text += lang == Language.English ? " Your lane — pressure him and take his last hits."
-                : " Линия в твою пользу — дави и мешай ему добивать.";
+                : " Линия в вашу пользу — давите и мешайте ему добивать.";
         if (m.StompLossRate >= 0.2)
             text += lang == Language.English ? $" Lost badly in {m.StompLossRate:P0} of games."
                 : $" В {m.StompLossRate:P0} игр линию против него проигрывают всухую.";

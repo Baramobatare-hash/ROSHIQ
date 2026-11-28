@@ -80,6 +80,15 @@ public partial class TierListView : UserControl, IRefreshable
         finally { _loading = false; RefreshButton.IsEnabled = true; }
     }
 
+    /// <summary>Версия данных вида «2026.11.25.6» — показываем как дату «25.11.2026».</summary>
+    private static string DataDate(string version)
+    {
+        var p = version.Split('.');
+        return p.Length >= 3 && int.TryParse(p[0], out var y) && int.TryParse(p[1], out var m) && int.TryParse(p[2], out var d)
+               && m is >= 1 and <= 12 && d is >= 1 and <= 31
+            ? $"{d:00}.{m:00}.{y}" : version;
+    }
+
     private void Render()
     {
         var L = Loc.Instance;
@@ -96,7 +105,7 @@ public partial class TierListView : UserControl, IRefreshable
         }
         var entries = byRole ?? TierList.Build(stats!, App.Host.Database.Heroes, _position, _bracket);
         StatusText.Text = byRole != null
-            ? L.Format("tier_status_role", entries.Count, App.Host.Database.DataVersion)
+            ? L.Format("tier_status_role", entries.Count, DataDate(App.Host.Database.DataVersion))
             : L.Format("tier_status", entries.Count, stats!.FetchedUtc.ToLocalTime().ToString("dd.MM HH:mm", CultureInfo.InvariantCulture));
         if (entries.Count == 0) { TiersPanel.Children.Add(Ui.Text(L.Get("tier_empty"), "MutedText")); CounterCard.Visibility = Visibility.Collapsed; return; }
 

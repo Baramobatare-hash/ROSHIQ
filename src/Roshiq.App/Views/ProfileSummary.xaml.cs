@@ -120,12 +120,14 @@ public partial class ProfileSummary : UserControl
         ProfileRank.Foreground = Ui.Res(calibrated ? "Muted" : "Text");
         ProfileRank.ToolTip = L.Get(d.EstimatedRankSolo ? "dash_rank_estimate_tip" : "dash_rank_estimate_tip_party");
         ProfileRank.Visibility = Visibility.Visible;
+        _ringCalibrated = calibrated;
         SetRankRing(d.EstimatedRankMean, L);
     }
 
     private double? _ringMean;
     private string _ringKey = "";
     private bool _ringAnimate;
+    private bool _ringCalibrated;   // медаль уже есть — кольцо показывает соперников, а не «сейчас»
     private System.Windows.Threading.DispatcherTimer? _ringTimer;
     private static readonly string[] TierRu = { "", "Рекрут", "Страж", "Рыцарь", "Герой", "Легенда", "Властелин", "Божество", "Титан" };
     private static readonly string[] TierEn = { "", "Herald", "Guardian", "Crusader", "Archon", "Legend", "Ancient", "Divine", "Immortal" };
@@ -135,7 +137,7 @@ public partial class ProfileSummary : UserControl
     {
         if (mean is not double m) { ProfileRankChartBox.Visibility = Visibility.Collapsed; _ringKey = ""; return; }
         ProfileRankChartBox.Visibility = Visibility.Visible;
-        var key = m.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture) + L.Language + _large;
+        var key = m.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture) + L.Language + _large + _ringCalibrated;
         if (key == _ringKey) return;
         _ringKey = key;
         _ringMean = m;
@@ -243,11 +245,13 @@ public partial class ProfileSummary : UserControl
         // справа: сейчас и следующий ранг
         string Name(int tier) => Roshiq.Data.Ranks.Name(tier, null, L.Language) ?? "?";
         double tx = size + (_large ? 18 : 10);
-        var now = ChartKit.Label(c, L.Format("rank_ring_now", Name(current)), tx, cy - (_large ? 30 : 18), "Text", _large ? 16 : 12, FontWeights.SemiBold);
+        var now = ChartKit.Label(c, L.Format(_ringCalibrated ? "rank_ring_opp" : "rank_ring_now", Name(current)), tx, cy - (_large ? 30 : 18), "Text", _large ? 16 : 12, FontWeights.SemiBold);
         string line2 = immortal ? L.Get("rank_ring_top")
             : L.Format("rank_ring_next", Name(next!.Value), (int)Math.Round(progress * 100));
         ChartKit.Label(c, line2, tx, cy - (_large ? 6 : 0), "Accent", _large ? 13 : 11, FontWeights.SemiBold);
-        if (_large)
+        if (_large && _ringCalibrated)
+            ChartKit.Label(c, L.Get("rank_ring_opp_note"), tx, cy + 16, "Muted", 11.5);
+        else if (_large)
             ChartKit.Label(c, L.Format("rank_ring_stars", star, 5, (L.Language == Roshiq.Core.Models.Language.English ? TierEn : TierRu)[medal]), tx, cy + 16, "Muted", 11.5);
         ProfileRankChartBox.ToolTip = L.Get("rank_ring_tip");
     }

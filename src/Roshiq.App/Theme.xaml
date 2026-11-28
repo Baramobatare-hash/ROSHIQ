@@ -116,6 +116,7 @@
         <Setter Property="FontFamily" Value="{StaticResource HeadlineFont}" />
         <Setter Property="FontSize" Value="17" />
         <Setter Property="FontWeight" Value="Black" />
+        <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="Foreground" Value="{DynamicResource Text}" />
         <Setter Property="Margin" Value="0,0,0,8" />
     </Style>

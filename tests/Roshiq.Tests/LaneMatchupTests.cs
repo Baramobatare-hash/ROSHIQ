@@ -31,7 +31,7 @@ public class LaneMatchupTests
         var axe = H(2, "axe");
         Assert.Empty(LaneAdvisor.Advise(new[] { axe }, Array.Empty<LaneTip>(), lane: _ => new LaneMatchup(100, 60, 10, 30, 10, 5)));
         var good = LaneAdvisor.Advise(new[] { axe }, Array.Empty<LaneTip>(), lane: _ => new LaneMatchup(600, 300, 120, 180, 60, 20)).Single();
-        Assert.Contains("в твою пользу", good.LaneLine(Language.Russian));
+        Assert.Contains("в вашу пользу", good.LaneLine(Language.Russian));
         Assert.DoesNotContain("всухую", good.LaneLine(Language.Russian));
     }
 

@@ -59,9 +59,9 @@ public partial class HistoryView : UserControl, IRefreshable
     {
         var L = Loc.Instance;
         ProfileHeader.Refresh();
-        ProfileRefreshButton.Content = L.Get("profile_refresh").ToUpperInvariant();
+        ProfileRefreshButton.Content = L.Get("profile_refresh");
         ProfileRefreshButton.Visibility = ProfileHeader.Linked ? Visibility.Visible : Visibility.Collapsed;
-        ProfileSteamButton.Content = L.Get(ProfileHeader.Linked ? "profile_steam_settings" : "dash_steam_link_btn").ToUpperInvariant();
+        ProfileSteamButton.Content = L.Get(ProfileHeader.Linked ? "profile_steam_settings" : "dash_steam_link_btn");
     }
 
     private async void ProfileRefresh_Click(object sender, RoutedEventArgs e)

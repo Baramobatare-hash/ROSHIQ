@@ -174,8 +174,8 @@ public partial class DraftView : UserControl, IRefreshable
         Ui.SelectValue(PoolBox, App.Host.Settings.Current.PoolMode);
 
         SideBox.Items.Clear();
-        SideBox.Items.Add(new Choice<Side>(Side.Radiant, "Radiant"));
-        SideBox.Items.Add(new Choice<Side>(Side.Dire, "Dire"));
+        SideBox.Items.Add(new Choice<Side>(Side.Radiant, L.Get("score_radiant")));
+        SideBox.Items.Add(new Choice<Side>(Side.Dire, L.Get("score_dire")));
         Ui.SelectValue(SideBox, App.Host.MySide);
 
         var heroes = Ui.ByAttribute(App.Host.Database.Heroes, L.Language)

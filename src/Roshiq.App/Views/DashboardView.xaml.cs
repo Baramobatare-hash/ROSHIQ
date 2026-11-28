@@ -133,7 +133,7 @@ public partial class DashboardView : UserControl, IRefreshable
         });
 
         ProfileSummary.Refresh();
-        ProfileButton.Content = L.Get(ProfileSummary.Linked ? "dash_profile_open" : "dash_steam_link_btn").ToUpperInvariant();
+        ProfileButton.Content = L.Get(ProfileSummary.Linked ? "dash_profile_open" : "dash_steam_link_btn");
         RefreshTipFeed(h, L);
         _updatingPosition = true;
         if (QuickPosition.Tag as string != L.Language.ToString())
